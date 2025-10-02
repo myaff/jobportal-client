@@ -1,6 +1,7 @@
 @use 'vuetify/settings' with (
   $overlay-opacity: 0.5,
   $overlay-scrim-background: #000,
+  $card-hover-elevation: 0,
 );
 
 .v-overlay.v-dialog {
@@ -25,4 +26,12 @@
 }
 .text-trunc-disable {
   white-space: normal;
+}
+.v-card {
+  --v-hover-opacity: 0;
+  --v-shadow-key-umbra-opacity: rgba(0, 0, 0, 0.05);
+
+  &:hover {
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+  }
 }

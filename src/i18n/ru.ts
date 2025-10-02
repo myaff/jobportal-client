@@ -3,6 +3,18 @@ export default {
     ru: 'Русский',
     en: 'English',
   },
+  app: {
+    title: 'Job Portal',
+    pages: {
+      home: 'Главная',
+      vacancies: 'Вакансии',
+    },
+  },
+  actions: {
+    reply: 'Откликнуться',
+    apply: 'Применить',
+    search: 'Найти',
+  },
   date: {
     title: 'Дата',
     range: 'Период',

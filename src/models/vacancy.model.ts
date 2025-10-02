@@ -1,4 +1,4 @@
-import { FilterParams, PaginationParams, SortParams } from "./common.model";
+import { FetchListResponse, FilterParams, PaginationParams, SortParams } from "./common.model";
 import { OrganizationDto } from "./organization.model";
 import { TagDto } from "./tag.model";
 
@@ -28,3 +28,5 @@ export interface VacancySearchParams extends
     status: string;
     type: string;
   }
+
+export type VacancySearchResponse = FetchListResponse<VacancyDto>;
