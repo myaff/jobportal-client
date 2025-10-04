@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { useUserStore } from '@/store/user';
-import { onMounted } from 'vue';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
@@ -58,11 +57,10 @@ const tabs = computed(() => {
 
 const userStore = useUserStore();
 const user = computed(() => userStore.user);
-const userName = computed(() => `${user.value.firstName} ${user.value.lastName}`);
 const isAuthorized = computed(() => userStore.isAuthorized);
 const signOut = () => {
-  userStore.signOut();
-  router.push({ name: 'auth' });
+  userStore.logout();
+  // router.push({ name: 'auth' });
 }
 </script>
 
@@ -102,9 +100,6 @@ const signOut = () => {
             {{ t(`page.${tab.key}`) }}
           </v-tab>
         </v-tabs>
-        <template #append>
-          <v-list-item :title="userName" :subtitle="user.email" append-icon="mdi-account" class="text-right"/>
-        </template>
       </v-app-bar>
       <v-layout class="page-content pa-4" full-height>
         <router-view />

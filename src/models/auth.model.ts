@@ -3,9 +3,9 @@ export interface AuthFormData {
   password: string;
 }
 
-interface TokenDTO {
+export interface TokenDTO {
   token: string;
-  expiresIn: string;
+  expiresIn: number;
 }
 
 export interface AuthResponseData {

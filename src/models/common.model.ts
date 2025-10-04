@@ -3,15 +3,6 @@ export interface PaginationParams {
   limit: number;
 }
 
-export interface PaginatableApi {
-  totalPages: number;
-  totalElements: number;
-  number: number;
-  first: boolean;
-  last: boolean;
-  numberOfElements: number;
-}
-
 export interface Paginatable {
   totalPages: number;
   totalElements: number;
@@ -30,7 +21,7 @@ export interface SortParams {
 
 export type FetchListParams = Partial<PaginationParams & FilterParams & SortParams>;
 
-export type FetchListResponse<T> = PaginatableApi & { content: T[] };
+export type FetchListResponse<T> = Paginatable & { content: T[] };
 
 export interface ValidationError {
   property: string;

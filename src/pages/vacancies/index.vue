@@ -8,17 +8,27 @@ import usePagination from '@/composables/usePagnation';
 import { VacancyDto, VacancySearchParams } from '@/models/vacancy.model';
 import { TagDto } from '@/models/tag.model';
 import TagService from '@/services/tags.service';
+import { useRouter, useRoute } from 'vue-router';
+import { isNumber } from 'lodash-es';
 
 const { t } = useI18n();
+const router = useRouter();
+const route = useRoute();
 const vacanciesService = new VacancyService();
 const tagService = new TagService();
+const PAGIN_BASE = 1;
+const PAGIN_LIMIT = 10;
 const {
   page,
   totalPages,
   paginationParams,
   setPage: setPageInternal,
   setPagination,
-} = usePagination({ base: 1, limit: 10 });
+} = usePagination({
+  base: PAGIN_BASE,
+  limit: PAGIN_LIMIT,
+  query: route.query,
+});
 
 function setPage(n: number) {
   setPageInternal(n);
@@ -42,11 +52,14 @@ const search = ref('');
 const tagsFilter = ref<string[]>([]);
 
 function updateList() {
+  const params = getRequestParams();
+
   return vacanciesService
-    .search(getRequestParams())
+    .search(params)
     .then(data => {
       list.value = data.content;
       setPagination(data);
+      setRouteQuery(params);
     });
 }
 function getRequestParams(): Partial<VacancySearchParams> {
@@ -55,6 +68,13 @@ function getRequestParams(): Partial<VacancySearchParams> {
     ...(search.value && { query: search.value }),
     ...(tagsFilter.value.length && { tags: tagsFilter.value }),
   }
+}
+
+function setRouteQuery(params: Partial<VacancySearchParams>) {
+  const routeQuery = { ...route.query, ...params };
+  if (routeQuery?.limit) delete routeQuery.limit;
+  if (isNumber(routeQuery?.page) && routeQuery.page <= PAGIN_BASE) delete routeQuery.page;
+  router.replace({ ...route, query: routeQuery });
 }
 
 function updateTags() {

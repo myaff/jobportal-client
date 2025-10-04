@@ -1,6 +1,5 @@
-import { Paginatable, PaginatableApi } from "@/models/common.model";
 import { ApiService } from "./api.service";
-import { VacancySearchParams, VacancySearchResponse } from "@/models/vacancy.model";
+import { VacancyDto, VacancySearchParams, VacancySearchResponse } from "@/models/vacancy.model";
 
 export default class VacancyService extends ApiService {
   resource = 'v1/vacancy';
@@ -15,17 +14,15 @@ export default class VacancyService extends ApiService {
       })
       .then(res => {
         return {
+          ...res.data,
           content: res.data?.content ?? [],
-          ...this.transformPagination(res.data),
         }
       });
   }
 
-  transformPagination(params: PaginatableApi): Paginatable {
-    return {
-      totalPages: params.totalPages,
-      totalElements: params.totalElements,
-      page: params.number,
-    }
+  getById(id: string) {
+    return VacancyService.api
+      .get<VacancyDto>(`${this.resource}/${id}`)
+      .then(res => res.data);
   }
 }

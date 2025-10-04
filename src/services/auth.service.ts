@@ -1,4 +1,4 @@
-import type { AuthFormData, AuthResponseData } from "@/models/auth.model";
+import type { AuthFormData, AuthResponseData, TokenDTO } from "@/models/auth.model";
 import { ApiService } from "./api.service";
 
 export default class AuthService extends ApiService {
@@ -42,9 +42,9 @@ export default class AuthService extends ApiService {
     return AuthService.api.post(`${this.resource}/logout`);
   }
 
-  transformToken(tokenData: { token: string; expiresIn: string }) {
+  transformToken(tokenData: TokenDTO) {
     const min = 60 * 1000;
-    const expiresAt = Date.now() + parseInt(tokenData.expiresIn) - (10 * min);
+    const expiresAt = Date.now() + tokenData.expiresIn - (10 * min);
     return {
       token: tokenData.token,
       expiresAt: new Date(expiresAt).toISOString(),
