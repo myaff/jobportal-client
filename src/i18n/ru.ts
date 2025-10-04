@@ -23,14 +23,26 @@ export default {
   },
   vacancy: {
     item: 'Вакансия',
+    items: 'Вакансии',
     notFound: 'Вакансия не найдена',
   },
+  reply: {
+    item: 'Отклик',
+    items: 'Отклики',
+    formTitle: 'Откликнуться',
+    yours: "Ваш отклик",
+    cv: 'Прикрепить резюме',
+  },
   errors: {
-    serverError: 'Внутренняя оибка сервера'
+    serverError: 'Внутренняя ошибка сервера',
   },
   user: {
-    username: 'Логин',
+    firstName: 'Имя',
+    middleName: 'Отчество',
+    lastName: 'Фамилия',
+    email: 'Email',
     password: 'Пароль',
+    repeatPassword: 'Повторите пароль',
   },
   date: {
     title: 'Дата',

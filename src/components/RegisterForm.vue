@@ -6,7 +6,7 @@ const emits = defineEmits(['submit']);
 defineExpose({ reset });
 const { t } = useI18n();
 const formData = reactive({
-  username: '',
+  email: '',
   password: '',
   repeatPassword: '',
   firstName: '',
@@ -17,8 +17,12 @@ function submit() {
   emits('submit', formData);
 }
 function reset() {
-  formData.username = '';
+  formData.email = '';
   formData.password = '';
+  formData.repeatPassword = '';
+  formData.firstName = '';
+  formData.middleName = '';
+  formData.lastName = '';
 }
 </script>
 
@@ -38,9 +42,9 @@ function reset() {
       type="email"
       :label="t('user.lastName')" />
     <v-text-field
-      v-model="formData.username"
+      v-model="formData.email"
       type="email"
-      :label="t('user.username')" />
+      :label="t('user.email')" />
     <v-text-field
       v-model="formData.password"
       type="password"

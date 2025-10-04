@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { useUserStore } from './store/user';
 import AuthForm from './components/AuthForm.vue';
 import RegisterForm from './components/RegisterForm.vue';
-import { AuthFormData } from './models/auth.model';
+import { AuthFormData } from './models/user.model';
 
 const { t } = useI18n();
 const userStore = useUserStore();

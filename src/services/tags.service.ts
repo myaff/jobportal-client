@@ -1,5 +1,5 @@
 import { ApiService } from "./api.service";
-import { TagDto } from "@/models/tag.model";
+import Tag, { TagDto } from "@/models/tag.model";
 
 
 export default class TagService extends ApiService {
@@ -10,7 +10,7 @@ export default class TagService extends ApiService {
       .get<TagDto[]>(`${this.resource}`)
       .then(res => {
         return {
-          content: res.data ?? [],
+          content: res.data?.map(tag => new Tag(tag)) ?? [],
         }
       });
   }

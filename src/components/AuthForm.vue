@@ -6,14 +6,14 @@ const emits = defineEmits(['submit']);
 defineExpose({ reset });
 const { t } = useI18n();
 const formData = reactive({
-  username: '',
+  email: '',
   password: '',
 });
 function submit() {
   emits('submit', formData);
 }
 function reset() {
-  formData.username = '';
+  formData.email = '';
   formData.password = '';
 }
 </script>
@@ -22,9 +22,9 @@ function reset() {
   <v-form @submit.prevent="submit">
     <slot name="prepend"></slot>
     <v-text-field
-      v-model="formData.username"
+      v-model="formData.email"
       type="email"
-      :label="t('user.username')" />
+      :label="t('user.email')" />
     <v-text-field
       v-model="formData.password"
       type="password"

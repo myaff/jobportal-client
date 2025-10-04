@@ -1,6 +1,6 @@
-import type { AuthFormData } from "@/models/auth.model";
-import type { User } from "@/models/user.model";
-import AuthService from "@/services/auth.service";
+import type { AuthFormData, UserDto } from "@/models/user.model";
+import User from "@/models/user.model";
+import UserService from "@/services/user.service";
 import { useLocalStorage } from "@vueuse/core";
 import { isBefore } from "date-fns";
 import { defineStore } from "pinia";
@@ -19,43 +19,52 @@ const defaultTokenData = {
 export const useUserStore = defineStore('user', () => {
   const accessToken = useLocalStorage('jp-accessToken', {...defaultTokenData});
   const refreshToken = useLocalStorage('jp-refreshToken', {...defaultTokenData});
-  const isAuthorized = computed(() => !!accessToken.value);
   const user = ref<User | null>(null);
-  const authService = new AuthService();
+  const token = computed(() => accessToken.value.token);
+  const isAuthorized = computed(() => !!token.value);
+  const userService = new UserService();
 
   const login = (formData: AuthFormData) => {
-    return authService.login(formData).then(data => {
+    return userService.login(formData).then(data => {
       accessToken.value = data.accessToken;
       refreshToken.value = data.refreshToken;
-      AuthService.setAuthToken(accessToken.value.token);
+      UserService.setAuthToken(accessToken.value.token);
+      getProfile();
     })
   }
 
   const register = (formData: AuthFormData) => {
-    return authService.register(formData).then(data => {
+    return userService.register(formData).then(data => {
       accessToken.value = data.accessToken;
       refreshToken.value = data.refreshToken;
-      AuthService.setAuthToken(accessToken.value.token);
+      UserService.setAuthToken(accessToken.value.token);
+      getProfile();
     })
   }
 
   const refresh = () => {
-    AuthService.removeAuthToken();
-    return authService.refresh(refreshToken.value.token).then(data => {
+    UserService.removeAuthToken();
+    return userService.refresh(refreshToken.value.token).then(data => {
       accessToken.value = data.accessToken;
       refreshToken.value = data.refreshToken;
-      AuthService.setAuthToken(data.accessToken.token);
+      UserService.setAuthToken(data.accessToken.token);
       return Promise.resolve();
     });
   }
 
   const logout = () => {
-    return authService.logout().then(() => {
+    return userService.logout().then(() => {
       accessToken.value = defaultTokenData;
       refreshToken.value = defaultTokenData;
       user.value = null;
-      AuthService.removeAuthToken();
+      UserService.removeAuthToken();
     });
+  }
+
+  const getProfile = () => {
+    return userService.getProfile().then(data => {
+      user.value = data;
+    })
   }
 
   const checkIfExpired = (tokenData: Token) => {
@@ -74,12 +83,13 @@ export const useUserStore = defineStore('user', () => {
     actualizeToken(refreshToken);
     if (!accessToken.value.token && refreshToken.value.token) await refresh();
     if (accessToken.value.token) {
-      AuthService.setAuthToken(accessToken.value.token);
+      UserService.setAuthToken(accessToken.value.token);
+      if (!user.value) await getProfile();
     }
   }
 
   return {
-    accessToken,
+    token,
     isAuthorized,
     user,
     login,

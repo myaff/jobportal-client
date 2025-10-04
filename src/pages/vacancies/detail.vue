@@ -1,18 +1,23 @@
 <script setup lang="ts">
 import { getQueryParamValue } from '@/composables/useUrlHelper';
-import { VacancyDto } from '@/models/vacancy.model';
+import Reply, { ReplyCreate } from '@/models/reply.model';
+import Vacancy from '@/models/vacancy.model';
+import ReplyService from '@/services/reply.service';
 import VacancyService from '@/services/vacancies.service';
+import { useUserStore } from '@/store/user';
 import { AxiosError } from 'axios';
 import { computed, ref, watchEffect } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
+import ReplyList from '@/components/ReplyList.vue';
+import ReplyForm from '@/components/ReplyForm.vue';
 
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
 const vacancyService = new VacancyService();
 const vacancyId = computed(() => getQueryParamValue(route.params?.id));
-const vacancy = ref<VacancyDto | null>(null);
+const vacancy = ref<Vacancy | null>(null);
 const breakcrumbs = computed(() => [
   {
     title: t('app.pages.home'),
@@ -40,6 +45,7 @@ function fetchDetails(id: string) {
       vacancy.value = data;
       errorStatus.value = null;
       errorText.value = '';
+      replies.value = [];
     })
     .catch(e => {
       console.log(e);
@@ -55,9 +61,37 @@ function fetchDetails(id: string) {
     .finally(() => isLoading.value = false);
 }
 
-watchEffect(() => {
-  if (vacancyId.value) fetchDetails(vacancyId.value);
+const userStore = useUserStore();
+const token = computed(() => userStore.token);
+const isAuthorized = computed(() => userStore.isAuthorized);
+const replyService = new ReplyService();
+const replies = ref<Reply[]>([]);
+const isRepliesLoading = ref(false);
+function fetchReplies(id: string) {
+  isRepliesLoading.value = true;
+  return replyService.getAllByVacancy(id)
+    .then(data => {
+      replies.value = data ?? [];
+    })
+    .finally(() => isRepliesLoading.value = false);
+}
+
+watchEffect(async () => {
+  if (vacancyId.value) {
+    if (token.value) ReplyService.setAuthToken(token.value);
+    await fetchDetails(vacancyId.value);
+    fetchReplies(vacancyId.value);
+  }
 })
+
+const replyFormCmp = ref();
+function sendReply(formData: ReplyCreate) {
+  return replyService
+    .create(vacancyId.value, formData)
+    .then(() => {
+      if (replyFormCmp.value?.reset) replyFormCmp.value.reset();
+    })
+}
 </script>
 
 <template>
@@ -66,11 +100,20 @@ watchEffect(() => {
       <v-breadcrumbs :items="breakcrumbs" />
       <v-row v-if="isLoading || vacancy">
         <v-col cols="8">
-          <v-skeleton-loader v-if="isLoading" type="article" />
-          <v-sheet v-else-if="vacancy" class="px-6 py-8">
-            <h1 class="text-h3">{{ vacancy.title }}</h1>
-            <div class="text-body-1 mt-6" v-html="vacancy.description"></div>
-          </v-sheet>
+          <div class="page__content">
+            <v-skeleton-loader v-if="isLoading" type="article" />
+            <v-sheet v-else-if="vacancy" class="px-6 py-8">
+              <h1 class="text-h3">{{ vacancy.title }}</h1>
+              <div class="text-body-1 mt-6" v-html="vacancy.description"></div>
+            </v-sheet>
+          </div>
+          <div class="replies mt-8">
+            <reply-list v-if="isAuthorized && replies?.length" :list="replies" />
+            <reply-form
+              v-else-if="isAuthorized && !replies?.length && !isRepliesLoading"
+              ref="replyFormCmp"
+              @submit="sendReply" />
+          </div>
         </v-col>
         <v-col cols="4">
           <v-sheet v-if="vacancy" class="pa-4">

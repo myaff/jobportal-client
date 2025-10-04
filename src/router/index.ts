@@ -35,11 +35,11 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to: RouteLocationNormalized) => {
-  if (!to.meta?.needAuth || to.name === 'auth') return true;
   const userStore = useUserStore();
   await userStore.init();
+  if (!to.meta?.needAuth) return true;
   if (userStore.isAuthorized) return true;
-  else return { name: 'auth' };
+  else return { name: 'home' };
 })
 
 export default router

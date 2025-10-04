@@ -24,12 +24,13 @@ function clear() {
 </script>
 
 <template>
-  <v-sheet class="list-search px-4 py-3">
+  <v-sheet class="list-search px-6 py-5" rounded="xl">
     <v-form @submit.prevent="submit">
       <v-text-field
         v-model="search"
         prepend-inner-icon="mdi-magnify"
         clearable
+        hide-details="auto"
         @update:model-value="value => emits('update:model-value', value)"
         @click:clear="clear">
         <template #append>

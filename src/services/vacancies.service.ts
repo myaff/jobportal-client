@@ -1,5 +1,5 @@
 import { ApiService } from "./api.service";
-import { VacancyDto, VacancySearchParams, VacancySearchResponse } from "@/models/vacancy.model";
+import Vacancy, { VacancyDto, VacancySearchParams, VacancySearchResponse } from "@/models/vacancy.model";
 
 export default class VacancyService extends ApiService {
   resource = 'v1/vacancy';
@@ -15,7 +15,7 @@ export default class VacancyService extends ApiService {
       .then(res => {
         return {
           ...res.data,
-          content: res.data?.content ?? [],
+          content: res.data?.content?.map(item => new Vacancy(item)) ?? [],
         }
       });
   }
@@ -23,6 +23,6 @@ export default class VacancyService extends ApiService {
   getById(id: string) {
     return VacancyService.api
       .get<VacancyDto>(`${this.resource}/${id}`)
-      .then(res => res.data);
+      .then(res => new Vacancy(res.data));
   }
 }

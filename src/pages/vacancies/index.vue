@@ -5,8 +5,8 @@ import ListFilters from '@/components/ListFilters.vue';
 import ListSearch from '@/components/ListSearch.vue';
 import VacancyService from '@/services/vacancies.service';
 import usePagination from '@/composables/usePagnation';
-import { VacancyDto, VacancySearchParams } from '@/models/vacancy.model';
-import { TagDto } from '@/models/tag.model';
+import Vacancy, { VacancySearchParams } from '@/models/vacancy.model';
+import Tag from '@/models/tag.model';
 import TagService from '@/services/tags.service';
 import { useRouter, useRoute } from 'vue-router';
 import { isNumber } from 'lodash-es';
@@ -35,8 +35,8 @@ function setPage(n: number) {
   updateList();
 }
 
-const list = ref<VacancyDto[]>([]);
-const tags = ref<TagDto[]>([]);
+const list = ref<Vacancy[]>([]);
+const tags = ref<Tag[]>([]);
 const breakcrumbs = computed(() => [
   {
     title: t('app.pages.home'),

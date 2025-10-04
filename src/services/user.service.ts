@@ -1,42 +1,61 @@
-import { Signed, User, UserSignIn, UserSignUp } from "@/models/user.model";
+import User, { AuthFormData, AuthResponseData, TokenDTO, UserDto, } from "@/models/user.model";
 import { ApiService } from "./api.service";
 import { AxiosError } from "axios";
-import { ResponseError } from "@/models/common.model";
 
-export class UserService extends ApiService {
-  resource = '/auth';
-  signIn(formData: UserSignIn) {
+export default class UserService extends ApiService {
+  resource = 'v1/user';
+  login(formData: AuthFormData) {
     return UserService.api
-      .post<Signed>(`${this.resource}/signin`, formData)
-      .then(res => { return res.data })
-      .catch((error: AxiosError) => {
-        throw { title: error.code, message: error.message };
-      });
+      .post<AuthResponseData>(`auth/login`, formData)
+      .then(res => {
+        return {
+          accessToken: this.transformToken(res.data.access_token),
+          refreshToken: this.transformToken(res.data.refresh_token),
+        }
+      })
   }
 
-  signup(formData: UserSignUp) {
+  register(formData: AuthFormData) {
     return UserService.api
-      .post<Signed>(`${this.resource}/signup`, formData)
-      .then(res => { return res.data })
-      .catch((error: AxiosError<ResponseError>) => {
-        throw error.response?.data;
-      });
+      .post<AuthResponseData>(`auth/register`, formData)
+      .then(res => {
+        return {
+          accessToken: this.transformToken(res.data.access_token),
+          refreshToken: this.transformToken(res.data.refresh_token),
+        }
+      })
   }
 
   refresh(token: string) {
+    UserService.setAuthToken(token);
     return UserService.api
-      .post<Signed>(`${this.resource}/refresh`, { token })
-      .then(res => { return res.data })
-      .catch((error: AxiosError) => {
-        throw { title: error.code, message: error.message };
-      });
+      .post<AuthResponseData>(`auth/refresh-token`)
+      .then(res => {
+        return {
+          accessToken: this.transformToken(res.data.access_token),
+          refreshToken: this.transformToken(res.data.refresh_token),
+        }
+      })
   }
 
-  fetchProfile() {
-    return UserService.api.get<User>(`${this.resource}/profile`)
-    .then(res => { return res.data })
+  logout() {
+    return UserService.api.post(`auth/logout`);
+  }
+
+  getProfile() {
+    return UserService.api.get<UserDto>(`${this.resource}/profile`)
+    .then(res => new User(res.data))
     .catch((error: AxiosError) => {
       throw { title: error.code, message: error.message };
     });
+  }
+
+  transformToken(tokenData: TokenDTO) {
+    const min = 60 * 1000;
+    const expiresAt = Date.now() + tokenData.expiresIn - (10 * min);
+    return {
+      token: tokenData.token,
+      expiresAt: new Date(expiresAt).toISOString(),
+    }
   }
 }
