@@ -1,6 +1,6 @@
 import { FetchListResponse, FilterParams, PaginationParams, SortParams } from "./common.model";
 import Organization, { OrganizationDto } from "./organization.model";
-import Tag, { TagDto } from "./tag.model";
+import { Tag, TagDto } from "./tag.model";
 
 export interface VacancyDto {
   id: string;
@@ -54,7 +54,7 @@ export class VacancyType {
   }
 }
 
-export default class Vacancy {
+export class Vacancy {
   id: string;
   title: string;
   description: string;
@@ -79,8 +79,8 @@ export default class Vacancy {
     return this.title;
   }
 
-  toJSON() {
-    return JSON.stringify({
+  toPlainObject() {
+    return {
       id: this.id,
       title: this.title,
       description: this.description,
@@ -89,6 +89,14 @@ export default class Vacancy {
       organization: this.organization.toJSON(),
       status: this.status,
       type: this.type.toJSON(),
-    })
+    }
+  }
+
+  toJSON() {
+    return JSON.stringify(this.toPlainObject());
+  }
+
+  static isValid(data: VacancyDto): data is VacancyDto {
+    return !!data?.id;
   }
 }

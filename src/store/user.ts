@@ -1,5 +1,6 @@
-import type { AuthFormData, UserDto } from "@/models/user.model";
-import User from "@/models/user.model";
+import { UserReply } from "@/models/reply.model";
+import type { AuthFormData, UserCreateFormData, UserEditFormData } from "@/models/user.model";
+import { User } from "@/models/user.model";
 import UserService from "@/services/user.service";
 import { useLocalStorage } from "@vueuse/core";
 import { isBefore } from "date-fns";
@@ -23,6 +24,7 @@ export const useUserStore = defineStore('user', () => {
   const token = computed(() => accessToken.value.token);
   const isAuthorized = computed(() => !!token.value);
   const userService = new UserService();
+  const replies = ref<UserReply[]>([]);
 
   const login = (formData: AuthFormData) => {
     return userService.login(formData).then(data => {
@@ -33,7 +35,7 @@ export const useUserStore = defineStore('user', () => {
     })
   }
 
-  const register = (formData: AuthFormData) => {
+  const register = (formData: UserCreateFormData) => {
     return userService.register(formData).then(data => {
       accessToken.value = data.accessToken;
       refreshToken.value = data.refreshToken;
@@ -62,9 +64,31 @@ export const useUserStore = defineStore('user', () => {
   }
 
   const getProfile = () => {
-    return userService.getProfile().then(data => {
-      user.value = data;
-    })
+    return userService
+      .getProfile()
+      .then(data => {
+        user.value = data;
+        return data;
+      })
+  }
+
+  const editProfile = (payload: Omit<UserEditFormData, 'email'>) => {
+    const formData = { ...payload, email: user.value?.email };
+    return userService
+      .editProfile(formData)
+      .then(data => {
+        user.value = data;
+        return data;
+      });
+  }
+
+  const getReplies = () => {
+    return userService
+      .getReplies()
+      .then(data => {
+        replies.value = data;
+        return data;
+      });
   }
 
   const checkIfExpired = (tokenData: Token) => {
@@ -92,9 +116,13 @@ export const useUserStore = defineStore('user', () => {
     token,
     isAuthorized,
     user,
+    replies,
     login,
     register,
     logout,
     init,
+    getProfile,
+    editProfile,
+    getReplies,
   };
 });

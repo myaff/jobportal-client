@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { TagCategoryDto, TagDto } from '@/models/tag.model';
+import { Tag, TagCategory } from '@/models/tag.model';
 import { computed, PropType, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
   tags: {
-    type: Array as PropType<TagDto[]>,
+    type: Array as PropType<Tag[]>,
     default: [],
   },
   modelValue: {
@@ -16,18 +16,18 @@ const props = defineProps({
 const emits = defineEmits(['update:model-value', 'reset', 'submit']);
 const { t } = useI18n();
 interface FilterGroup {
-  category: TagCategoryDto;
-  list: Omit<TagDto, 'tagCategory'>[];
+  category: TagCategory;
+  list: Pick<Tag, 'name' | 'localizedName'>[];
 }
-const uncategorized = {
+const uncategorized = new TagCategory({
   id: 'uncategorised',
-  name: 'Тэги'
-}
+  name: 'Тэги',
+})
 const filters = computed(() => {
   return props.tags.reduce((acc, item) => {
-    const category = item?.tagCategory ?? uncategorized;
-    const group = getOrAddMapItem(acc,category.id, { category: category, list: [] });
-    const tag = { ...item, tagCategory: undefined };
+    const category = item?.category ?? uncategorized;
+    const group = getOrAddMapItem(acc, category.id, { category: category, list: [] });
+    const tag = { ...item, category: undefined };
     group.list.push(tag);
     return acc;
   }, new Map<string, FilterGroup>());

@@ -1,30 +1,28 @@
-import User, { UserDto } from "./user.model";
-import Vacancy, { VacancyDto } from "./vacancy.model";
+import { User, UserDto } from "./user.model";
+import { Vacancy, VacancyDto } from "./vacancy.model";
 
 export interface ReplyDto {
   id: string;
-  author: UserDto;
+  author: UserDto | null;
   content: string;
   date: string;
-  status: string;
-  vacancy?: VacancyDto;
+  status: keyof typeof ReplyStatus;
+  vacancy?: VacancyDto | null;
   vacancyId: string;
 }
 
 export type ReplyCreate = Pick<Reply, 'content'>;
 
-export default class Reply {
+export class Reply {
   id: string;
-  author: User;
   content: string;
   date: Date;
-  status: string;
+  status: keyof typeof ReplyStatus;
   vacancy: Vacancy | null;
   vacancyId: string;
 
   constructor(data: ReplyDto) {
     this.id = data.id;
-    this.author = new User(data.author);
     this.content = data?.content ?? '';
     this.date = new Date(data.date);
     this.status = data.status;
@@ -32,19 +30,85 @@ export default class Reply {
     this.vacancy = data?.vacancy ? new Vacancy(data.vacancy) : null;
   }
 
+  toPlainObject() {
+    return {
+      id: this.id,
+      content: this.content,
+      date: this.date.toISOString(),
+      status: this.status,
+      ...(this?.vacancy && { vacancy: this.vacancy.toJSON() }),
+    }
+  }
+
   toString() {
     return this.content;
   }
 
   toJSON() {
-    return JSON.stringify({
-      id: this.id,
-      author: this.author.toJSON(),
-      content: this.content,
-      date: this.date.toISOString(),
-      status: this.status,
-      ...(this?.vacancy && { vacancy: this.vacancy.toJSON() }),
-    })
+    return JSON.stringify(this.toPlainObject());
   }
 }
 
+export class VacancyReply extends Reply {
+  author: User;
+
+  constructor(data: ReplyDto & { author: UserDto }) {
+    super(data);
+    this.author = new User(data.author);
+  }
+
+  static isValid(data: ReplyDto): data is ReplyDto & { author: UserDto } {
+    return !!data?.id && !!data?.author && User.isValid(data.author);
+  }
+
+  toPlainObject() {
+    return {
+      ...super.toPlainObject(),
+      author: this.author.toJSON(),
+    }
+  }
+
+  toJSON() {
+    return JSON.stringify(this.toPlainObject());
+  }
+}
+
+export class UserReply extends Reply {
+  vacancy: Vacancy;
+
+  constructor(data: ReplyDto & { vacancy: VacancyDto }) {
+    super(data);
+    this.vacancy = new Vacancy(data.vacancy);
+  }
+
+  toPlainObject() {
+    return {
+      ...super.toPlainObject(),
+      vacancy: this.vacancy.toJSON(),
+    }
+  }
+
+  toJSON() {
+    return JSON.stringify(this.toPlainObject);
+  }
+
+  static isValid(data: ReplyDto): data is ReplyDto & { vacancy: VacancyDto } {
+    return !!data?.id
+      && !!data?.vacancy
+      && Vacancy.isValid(data.vacancy);
+  }
+}
+
+export enum ReplyStatus {
+  NEW = 'NEW',
+  SEEN = 'SEEN',
+  REJECTED = 'REJECTED',
+  SUSPENDED = 'SUSPENDED',
+}
+
+export enum ReplyStatusColor {
+  NEW = 'info',
+  SEEN = 'default',
+  REJECTED = 'error',
+  SUSPENDED = 'warning'
+}

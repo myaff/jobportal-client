@@ -1,19 +1,22 @@
 <script setup lang="ts">
-import { reactive } from 'vue';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const emits = defineEmits(['submit']);
 defineExpose({ reset });
 
 const { t } = useI18n();
-const formData = reactive({
-  content: '',
-})
+const message = ref('');
+const cv = ref<File | null>(null);
 function submit() {
+  const formData = new FormData();
+  formData.append('content', message.value);
+  if (cv.value) formData.append('cv', cv.value);
   emits('submit', formData);
 }
 function reset() {
-  formData.content = '';
+  message.value = '';
+  cv.value = null;
 }
 </script>
 
@@ -24,8 +27,9 @@ function reset() {
         {{ t('reply.formTitle') }}
       </h4>
       <v-textarea
-        v-model="formData.content"
-        :label="t('reply.yours')" />
+        v-model="message"
+        :label="t('reply.yourItem')" />
+      <v-file-input v-model="cv" :label="t('reply.attachCV')" />
       <v-btn :text="t('actions.send')" color="primary" size="large" @click="submit" />
     </v-form>
   </v-sheet>

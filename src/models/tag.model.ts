@@ -30,7 +30,7 @@ export class TagCategory {
   }
 }
 
-export default class Tag {
+export class Tag {
   name: string;
   localizedName: string;
   category: TagCategory | null;
@@ -47,11 +47,15 @@ export default class Tag {
     return this.localizedName;
   }
 
-  toJSON() {
-    return JSON.stringify({
+  toPlainObject() {
+    return {
       name: this.name,
       localizedName: this.localizedName,
       category: this.category,
-    });
+    };
+  }
+
+  toJSON() {
+    return JSON.stringify(this.toPlainObject());
   }
 }

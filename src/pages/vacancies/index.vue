@@ -5,11 +5,12 @@ import ListFilters from '@/components/ListFilters.vue';
 import ListSearch from '@/components/ListSearch.vue';
 import VacancyService from '@/services/vacancies.service';
 import usePagination from '@/composables/usePagnation';
-import Vacancy, { VacancySearchParams } from '@/models/vacancy.model';
-import Tag from '@/models/tag.model';
+import { Vacancy, VacancySearchParams } from '@/models/vacancy.model';
+import { Tag } from '@/models/tag.model';
 import TagService from '@/services/tags.service';
 import { useRouter, useRoute } from 'vue-router';
 import { isNumber } from 'lodash-es';
+import { PageName } from '@/router';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -105,7 +106,7 @@ onMounted(() => {
               v-for="item in list"
               :key="item.id"
               variant="flat"
-              :to="{ name: 'vacanciesDetail', params: { id: item.id } }"
+              :to="{ name: PageName.VACANCY, params: { id: item.id } }"
               hover
               color="white"
               rounded="lg"

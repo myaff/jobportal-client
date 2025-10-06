@@ -1,11 +1,18 @@
 // Composables
 import { useUserStore } from '@/store/user';
-import { RouteLocationNormalized, createRouter, createWebHistory } from 'vue-router'
+import { RouteLocationNormalized, createRouter, createWebHistory } from 'vue-router';
+
+export enum PageName {
+  HOME = 'home',
+  VACANCIES = 'vacancies',
+  VACANCY = 'vacancy',
+  ACCOUNT = 'account',
+}
 
 const routes = [
   {
     path: '/',
-    name: 'home',
+    name: PageName.HOME,
     // route level code-splitting
     // this generates a separate chunk (Home-[hash].js) for this route
     // which is lazy-loaded when the route is visited.
@@ -19,13 +26,19 @@ const routes = [
   },
   {
     path: '/vacancies',
-    name: 'vacancies',
+    name: PageName.VACANCIES,
     component: () => import('@/pages/vacancies/index.vue'),
   },
   {
     path: '/vacancies/:id',
-    name: 'vacanciesDetail',
+    name: PageName.VACANCY,
     component: () => import('@/pages/vacancies/detail.vue'),
+  },
+  {
+    path: '/account',
+    name: PageName.ACCOUNT,
+    component: () => import('@/pages/account/index.vue'),
+    meta: { needAuth: true },
   },
 ]
 

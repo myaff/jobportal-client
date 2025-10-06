@@ -10,6 +10,7 @@ export default {
       vacancies: 'Вакансии',
       signin: 'Вход',
       signup: 'Регистрация',
+      account: 'Профиль',
     },
   },
   actions: {
@@ -19,7 +20,9 @@ export default {
     back: 'Назад',
     signin: 'Войти',
     signup: 'Зарегистрироваться',
+    signout: 'Выйти',
     send: 'Отправить',
+    save: 'Сохранить',
   },
   vacancy: {
     item: 'Вакансия',
@@ -30,8 +33,9 @@ export default {
     item: 'Отклик',
     items: 'Отклики',
     formTitle: 'Откликнуться',
-    yours: "Ваш отклик",
-    cv: 'Прикрепить резюме',
+    yourItem: "Ваш отклик",
+    yourItems: "Ваши отклики",
+    attachCV: 'Прикрепить резюме',
   },
   errors: {
     serverError: 'Внутренняя ошибка сервера',
@@ -43,6 +47,9 @@ export default {
     email: 'Email',
     password: 'Пароль',
     repeatPassword: 'Повторите пароль',
+    edit: 'Редактировать профиль',
+    description: 'Описание',
+    descriptionPlaceholder: 'Добавьте информацию о себе',
   },
   date: {
     title: 'Дата',

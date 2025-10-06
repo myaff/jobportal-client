@@ -1,6 +1,7 @@
-import User, { AuthFormData, AuthResponseData, TokenDTO, UserDto, } from "@/models/user.model";
+import { User, AuthFormData, AuthResponseData, TokenDTO, UserDto, UserEditFormData, } from "@/models/user.model";
 import { ApiService } from "./api.service";
 import { AxiosError } from "axios";
+import { ReplyDto, UserReply } from "@/models/reply.model";
 
 export default class UserService extends ApiService {
   resource = 'v1/user';
@@ -44,10 +45,26 @@ export default class UserService extends ApiService {
 
   getProfile() {
     return UserService.api.get<UserDto>(`${this.resource}/profile`)
-    .then(res => new User(res.data))
-    .catch((error: AxiosError) => {
-      throw { title: error.code, message: error.message };
-    });
+      .then(res => new User(res.data))
+      .catch((error: AxiosError) => {
+        throw { title: error.code, message: error.message };
+      });
+  }
+
+  editProfile(formData: UserEditFormData) {
+    return UserService.api
+      .patch<UserDto>(`${this.resource}`, formData)
+      .then(res => new User(res.data));
+  }
+
+  getReplies() {
+    return UserService.api
+      .get<ReplyDto[]>(`${this.resource}/replies`)
+      .then(res => {
+        return res.data
+          .filter(item => UserReply.isValid(item))
+          .map(item => new UserReply(item));
+      });
   }
 
   transformToken(tokenData: TokenDTO) {

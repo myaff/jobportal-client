@@ -1,5 +1,5 @@
 import { ApiService } from "./api.service";
-import Tag, { TagDto } from "@/models/tag.model";
+import { Tag, TagDto } from "@/models/tag.model";
 
 
 export default class TagService extends ApiService {

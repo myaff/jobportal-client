@@ -50,6 +50,11 @@ function reset() {
       type="password"
       :label="t('user.password')"
       class="mt-2" />
+    <v-text-field
+      v-model="formData.repeatPassword"
+      type="password"
+      :label="t('user.repeatPassword')"
+      class="mt-2" />
     <v-btn
       :text="t('actions.signup')"
       color="primary"

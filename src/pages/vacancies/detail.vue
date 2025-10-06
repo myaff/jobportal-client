@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { getQueryParamValue } from '@/composables/useUrlHelper';
-import Reply, { ReplyCreate } from '@/models/reply.model';
-import Vacancy from '@/models/vacancy.model';
+import { VacancyReply } from '@/models/reply.model';
+import { Vacancy } from '@/models/vacancy.model';
 import ReplyService from '@/services/reply.service';
 import VacancyService from '@/services/vacancies.service';
 import { useUserStore } from '@/store/user';
@@ -9,7 +9,7 @@ import { AxiosError } from 'axios';
 import { computed, ref, watchEffect } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
-import ReplyList from '@/components/ReplyList.vue';
+import VacancyReplyList from '@/components/VacancyReplyList.vue';
 import ReplyForm from '@/components/ReplyForm.vue';
 
 const route = useRoute();
@@ -65,7 +65,7 @@ const userStore = useUserStore();
 const token = computed(() => userStore.token);
 const isAuthorized = computed(() => userStore.isAuthorized);
 const replyService = new ReplyService();
-const replies = ref<Reply[]>([]);
+const replies = ref<VacancyReply[]>([]);
 const isRepliesLoading = ref(false);
 function fetchReplies(id: string) {
   isRepliesLoading.value = true;
@@ -85,7 +85,7 @@ watchEffect(async () => {
 })
 
 const replyFormCmp = ref();
-function sendReply(formData: ReplyCreate) {
+function sendReply(formData: FormData) {
   return replyService
     .create(vacancyId.value, formData)
     .then(() => {
@@ -108,7 +108,7 @@ function sendReply(formData: ReplyCreate) {
             </v-sheet>
           </div>
           <div class="replies mt-8">
-            <reply-list v-if="isAuthorized && replies?.length" :list="replies" />
+            <vacancy-reply-list v-if="isAuthorized && replies?.length" :list="replies" />
             <reply-form
               v-else-if="isAuthorized && !replies?.length && !isRepliesLoading"
               ref="replyFormCmp"

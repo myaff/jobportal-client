@@ -1,5 +1,5 @@
 import { ApiService } from "./api.service";
-import Vacancy, { VacancyDto, VacancySearchParams, VacancySearchResponse } from "@/models/vacancy.model";
+import { Vacancy, VacancyDto, VacancySearchParams, VacancySearchResponse } from "@/models/vacancy.model";
 
 export default class VacancyService extends ApiService {
   resource = 'v1/vacancy';

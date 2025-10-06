@@ -35,3 +35,11 @@
     box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
   }
 }
+
+.text-break {
+  white-space: break-spaces;
+}
+
+.readonly .v-field--variant-solo-filled.v-field--focused .v-field__overlay {
+  --v-focus-opacity: var(--v-hover-opacity);
+}
