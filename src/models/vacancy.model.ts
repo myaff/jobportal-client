@@ -9,8 +9,9 @@ export interface VacancyDto {
   date: string;
   tags: TagDto[];
   organization: OrganizationDto;
-  status: string;
-  type: VacancyTypeDto;
+  status: keyof typeof VacancyStatuses;
+  type: VacancyPropDto;
+  salary: string;
 }
 
 export interface VacancySearchParams extends
@@ -24,20 +25,20 @@ export interface VacancySearchParams extends
   }
 
 export type VacancySearchResponse = FetchListResponse<VacancyDto>;
-export interface VacancyTypeDto {
-  name: string;
-  description: string;
+export interface VacancyPropDto<T = string> {
+  name: T;
+  description?: string;
   localizedName: string;
 }
 
-export class VacancyType {
+export class VacancyProp {
   name: string;
   description: string;
   localizedName: string;
 
-  constructor(data: VacancyTypeDto) {
+  constructor(data: VacancyPropDto) {
     this.name = data.name;
-    this.description = data.description ?? '';
+    this.description = data?.description ?? '';
     this.localizedName = data.localizedName;
   }
 
@@ -61,8 +62,9 @@ export class Vacancy {
   date: Date;
   tags: Tag[];
   organization: Organization;
-  status: string;
-  type: VacancyType;
+  status: keyof typeof VacancyStatuses;
+  type: VacancyProp;
+  salary: string;
 
   constructor(data: VacancyDto) {
     this.id = data.id;
@@ -72,7 +74,8 @@ export class Vacancy {
     this.tags = data?.tags.map(tag => new Tag(tag));
     this.organization = new Organization(data.organization);
     this.status = data.status;
-    this.type = new VacancyType(data.type);
+    this.type = new VacancyProp(data.type);
+    this.salary = data?.salary ?? '';
   }
 
   toString() {
@@ -89,6 +92,7 @@ export class Vacancy {
       organization: this.organization.toJSON(),
       status: this.status,
       type: this.type.toJSON(),
+      salary: this.salary,
     }
   }
 
@@ -98,5 +102,44 @@ export class Vacancy {
 
   static isValid(data: VacancyDto): data is VacancyDto {
     return !!data?.id;
+  }
+}
+
+export enum VacancyStatuses {
+  OPEN = 'SEEN',
+  CLOSED = 'REJECTED',
+  SUSPENDED = 'SUSPENDED',
+}
+
+export enum VacancyStatusColor {
+  OPEN = 'green',
+  CLOSED = 'error',
+  SUSPENDED = 'warning'
+}
+
+export class VacancyStatus {
+  name: keyof typeof VacancyStatuses;
+  localizedName: string;
+  color: string;
+
+  constructor(data: VacancyPropDto<keyof typeof VacancyStatuses>) {
+    this.name = data.name;
+    this.localizedName = data.localizedName ?? this.name;
+    this.color = VacancyStatusColor[this.name] ?? 'default';
+  }
+
+  toString() {
+    return this.localizedName ?? this.name;
+  }
+
+  toPlainObject() {
+    return {
+      name: this.name,
+      localizedName: this.localizedName,
+    }
+  }
+
+  toJSON() {
+    return JSON.stringify(this.toPlainObject());
   }
 }

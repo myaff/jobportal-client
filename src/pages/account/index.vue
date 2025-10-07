@@ -55,20 +55,27 @@ onMounted(() => userStore.getReplies());
     <v-container>
       <v-breadcrumbs :items="breakcrumbs" />
       <v-card v-if="user" variant="flat" :hover="false">
-        <template #prepend>
-          <v-avatar color="grey-lighten-3" size="64">
-            <v-icon icon="mdi-account" size="32" />
-          </v-avatar>
-        </template>
-        <template #title>
-          <h2 class="text-h4 mx-2 mt-2">{{ user?.fullName }}</h2>
-        </template>
-        <template #subtitle>
-          <p class="text-h6 mx-2 mb-2">{{ user.email }}</p>
-        </template>
-        <template #append>
-          <v-btn icon="mdi-cog" variant="flat" @click="editDialolog = true" />
-        </template>
+        <v-card-item>
+          <div class="d-flex flex-wrap ga-2 align-center">
+            <v-avatar color="grey-lighten-3" size="64" class="d-none d-sm-flex">
+              <v-icon icon="mdi-account" size="32" />
+            </v-avatar>
+            <div class="content ma-2">
+              <h2 class="text-h5 text-lg-h4 mx-2 mt-2 font-weight-bold">
+                {{ user?.fullName }}
+              </h2>
+              <p class="text-h6 mx-2 mb-2 text-grey">
+                {{ user.email }}
+              </p>
+            </div>
+            <div class="setting position-absolute top-0 right-0 mt-1 mr-1 mt-sm-2 mr-sm-2">
+              <v-btn
+                icon="mdi-cog"
+                variant="flat"
+                @click="editDialolog = true" />
+            </div>
+          </div>
+        </v-card-item>
         <v-card-text>
           <div class="user-description">
             <v-textarea

@@ -34,11 +34,14 @@ function clear() {
         @update:model-value="value => emits('update:model-value', value)"
         @click:clear="clear">
         <template #append>
-          <v-btn color="primary" size="x-large" @click="submit">
+          <v-btn color="primary" size="x-large" class="d-none d-sm-flex" @click="submit">
             {{ t('actions.search') }}
           </v-btn>
         </template>
       </v-text-field>
+      <v-btn color="primary" size="large" block class="d-sm-none mt-4" @click="submit">
+        {{ t('actions.search') }}
+      </v-btn>
     </v-form>
   </v-sheet>
 </template>

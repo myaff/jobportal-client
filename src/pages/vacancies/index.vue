@@ -5,12 +5,14 @@ import ListFilters from '@/components/ListFilters.vue';
 import ListSearch from '@/components/ListSearch.vue';
 import VacancyService from '@/services/vacancies.service';
 import usePagination from '@/composables/usePagnation';
-import { Vacancy, VacancySearchParams } from '@/models/vacancy.model';
+import { Vacancy, VacancySearchParams, VacancyStatus } from '@/models/vacancy.model';
 import { Tag } from '@/models/tag.model';
 import TagService from '@/services/tags.service';
 import { useRouter, useRoute } from 'vue-router';
 import { isNumber } from 'lodash-es';
 import { PageName } from '@/router';
+import { useAppStore } from '@/store/app';
+import VacancyCard from '@/components/VacancyCard.vue';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -51,6 +53,16 @@ const breakcrumbs = computed(() => [
 
 const search = ref('');
 const tagsFilter = ref<string[]>([]);
+
+const appStore = useAppStore();
+const vacancyStatuses = computed(() => appStore.vacancyStatus);
+const getStatus = (vacancy: Vacancy) => {
+  return vacancyStatuses.value.get(vacancy.status)
+    ?? new VacancyStatus({
+      name: vacancy.status,
+      localizedName: vacancy.status,
+    });
+}
 
 function updateList() {
   const params = getRequestParams();
@@ -95,36 +107,24 @@ onMounted(() => {
       <div class="search-box">
         <list-search v-model="search" @submit="updateList" />
       </div>
-      <v-breadcrumbs :items="breakcrumbs" />
+      <v-breadcrumbs :items="breakcrumbs" class="flex-wrap" />
       <v-row>
-        <v-col cols="4">
-          <list-filters :tags="tags" v-model="tagsFilter" class="filters pa-3" @submit="updateList" />
+        <v-col cols="12" lg="4">
+          <list-filters
+            v-if="tags.length"
+            :tags="tags"
+            v-model="tagsFilter"
+            class="filters pa-3"
+            @submit="updateList" />
         </v-col>
-        <v-col cols="8">
+        <v-col cols="12" lg="8">
           <div class="d-flex flex-column ga-4">
-            <v-card
+            <vacancy-card
               v-for="item in list"
               :key="item.id"
-              variant="flat"
-              :to="{ name: PageName.VACANCY, params: { id: item.id } }"
-              hover
-              color="white"
-              rounded="lg"
-              :prepend-avatar="item?.organization?.logoUrl"
-              :title="item.title"
-              :subtitle="item?.organization?.name"
-              class="py-3 px-2">
-              <v-chip-group v-if="item.tags?.length">
-                <v-chip v-for="tag in item.tags" :key="tag.name">
-                  {{ tag.localizedName }}
-                </v-chip>
-              </v-chip-group>
-              <v-card-actions>
-                <v-btn variant="flat" color="primary">
-                  {{ t('actions.reply') }}
-                </v-btn>
-              </v-card-actions>
-            </v-card>
+              :vacancy="item"
+              :status="getStatus(item)"
+              :to="{ name: PageName.VACANCY, params: { id: item.id } }" />
           </div>
           <v-pagination
             v-if="totalPages > 1"

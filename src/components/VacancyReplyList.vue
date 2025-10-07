@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { VacancyReply, ReplyStatusColor } from '@/models/reply.model';
+import { VacancyReply } from '@/models/reply.model';
 import { UserRole } from '@/models/user.model';
+import { useAppStore } from '@/store/app';
 import { useUserStore } from '@/store/user';
 import { computed, PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -15,9 +16,12 @@ const { t } = useI18n();
 const userStore = useUserStore();
 const user = computed(() => userStore.user);
 const role = computed(() => user.value?.role ?? UserRole.USER);
+const appStore = useAppStore();
+const replyStatuses = computed(() => appStore.replyStatus);
 const listMapped = computed(() => {
   return props.list.map(item => ({
     ...item,
+    status: replyStatuses.value.get(item.status),
     isMine: role.value === UserRole.USER
       && item.author.email === user.value?.email,
   }))
@@ -32,24 +36,34 @@ const listMapped = computed(() => {
     <v-card
       v-for="reply in listMapped"
       :key="reply.id"
-      :title="reply.isMine ? t('reply.yourItem') : user?.fullName"
-      :subtitle="reply.date.toLocaleString()"
       :id="reply.id"
       class="reply-list__item mt-5">
-      <template #prepend>
-        <v-avatar color="info">
-          <v-icon v-if="reply.isMine" icon="mdi-star" />
-          <span v-else class="text-h5">{{ reply.author.abbreviation }}</span>
-        </v-avatar>
-      </template>
+      <v-card-item>
+        <div class="d-flex flex-wrap ga-3 align-center">
+          <v-avatar color="info" size="40">
+            <v-icon v-if="reply.isMine" icon="mdi-star" />
+            <span v-else class="text-h6 text-lg-h5">
+              {{ reply.author.abbreviation }}
+            </span>
+          </v-avatar>
+          <div class="content">
+            <div class="text-h6 font-weight-bold">
+              {{ reply.isMine ? t('reply.yourItem') : user?.fullName }}
+            </div>
+            <div class="text-subtitle-2 text-grey">
+              {{ reply.date.toLocaleString() }}
+            </div>
+          </div>
+          <div v-if="reply?.status" class="status w-100 w-sm-auto ml-sm-auto">
+            <v-chip :color="reply.status.color">
+              {{ reply.status.localizedName }}
+            </v-chip>
+          </div>
+        </div>
+      </v-card-item>
       <v-card-text>
         <p class="text-body-1 text-break">{{ reply.content }}</p>
       </v-card-text>
-      <template #append>
-        <v-chip :color="ReplyStatusColor[reply.status]">
-          {{ reply.status }}
-        </v-chip>
-      </template>
     </v-card>
   </div>
 </template>

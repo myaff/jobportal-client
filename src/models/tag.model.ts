@@ -59,3 +59,8 @@ export class Tag {
     return JSON.stringify(this.toPlainObject());
   }
 }
+
+export interface TagFilterGroup {
+  category: TagCategory;
+  list: Pick<Tag, 'name' | 'localizedName'>[];
+}

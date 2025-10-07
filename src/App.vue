@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from './store/user';
 import AuthForm from './components/AuthForm.vue';
@@ -7,6 +7,7 @@ import RegisterForm from './components/RegisterForm.vue';
 import { AuthFormData, UserCreateFormData } from './models/user.model';
 import { useRoute, useRouter } from 'vue-router';
 import { PageName } from './router';
+import { useAppStore } from './store/app';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -42,6 +43,9 @@ function closeAuth() {
   authDialogMode.value = 'signin';
 }
 const profileMenu = ref(false);
+
+const appStore = useAppStore();
+onMounted(async () => await appStore.init());
 </script>
 
 <template>
@@ -71,12 +75,14 @@ const profileMenu = ref(false);
                     </v-avatar>
                   </template>
                   <template #title>
-                    <p class="text-right">
+                    <p class="d-none d-sm-block text-right">
                       {{ `${user.firstName} ${user.lastName}` }}
                     </p>
                   </template>
                   <template #subtitle>
-                    <p class="text-right">{{ user.email }}</p>
+                    <p class="d-none d-sm-block text-right">
+                      {{ user.email }}
+                    </p>
                   </template>
                 </v-list-item>
               </template>

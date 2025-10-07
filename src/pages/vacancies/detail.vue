@@ -11,6 +11,8 @@ import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import VacancyReplyList from '@/components/VacancyReplyList.vue';
 import ReplyForm from '@/components/ReplyForm.vue';
+import VacancyCompanyDetails from '@/components/VacancyCompanyDetails.vue';
+import VacancyDetailsCard from '@/components/VacancyDetailsCard.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -97,15 +99,12 @@ function sendReply(formData: FormData) {
 <template>
   <div class="page">
     <v-container>
-      <v-breadcrumbs :items="breakcrumbs" />
+      <v-breadcrumbs :items="breakcrumbs" class="flex-wrap" />
       <v-row v-if="isLoading || vacancy">
-        <v-col cols="8">
+        <v-col cols="12" lg="8">
           <div class="page__content">
             <v-skeleton-loader v-if="isLoading" type="article" />
-            <v-sheet v-else-if="vacancy" class="px-6 py-8">
-              <h1 class="text-h3">{{ vacancy.title }}</h1>
-              <div class="text-body-1 mt-6" v-html="vacancy.description"></div>
-            </v-sheet>
+            <vacancy-details-card v-else-if="vacancy" :vacancy="vacancy" />
           </div>
           <div class="replies mt-8">
             <vacancy-reply-list v-if="isAuthorized && replies?.length" :list="replies" />
@@ -115,10 +114,10 @@ function sendReply(formData: FormData) {
               @submit="sendReply" />
           </div>
         </v-col>
-        <v-col cols="4">
-          <v-sheet v-if="vacancy" class="pa-4">
-            Aside content
-          </v-sheet>
+        <v-col cols="12" lg="4" order="first" order-lg="last">
+          <vacancy-company-details
+            v-if="vacancy?.organization"
+            :company="vacancy.organization" />
         </v-col>
       </v-row>
       <v-empty-state

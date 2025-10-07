@@ -28,6 +28,9 @@ export default {
     item: 'Вакансия',
     items: 'Вакансии',
     notFound: 'Вакансия не найдена',
+    type: "Тип",
+    status: "Статус",
+    salary: 'Оплата'
   },
   reply: {
     item: 'Отклик',

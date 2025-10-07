@@ -6,7 +6,7 @@ export interface ReplyDto {
   author: UserDto | null;
   content: string;
   date: string;
-  status: keyof typeof ReplyStatus;
+  status: keyof typeof ReplyStatuses;
   vacancy?: VacancyDto | null;
   vacancyId: string;
 }
@@ -17,7 +17,7 @@ export class Reply {
   id: string;
   content: string;
   date: Date;
-  status: keyof typeof ReplyStatus;
+  status: keyof typeof ReplyStatuses;
   vacancy: Vacancy | null;
   vacancyId: string;
 
@@ -99,7 +99,7 @@ export class UserReply extends Reply {
   }
 }
 
-export enum ReplyStatus {
+export enum ReplyStatuses {
   NEW = 'NEW',
   SEEN = 'SEEN',
   REJECTED = 'REJECTED',
@@ -111,4 +111,36 @@ export enum ReplyStatusColor {
   SEEN = 'default',
   REJECTED = 'error',
   SUSPENDED = 'warning'
+}
+
+export interface ReplyStatusDto {
+  statusName: keyof typeof ReplyStatuses;
+  localizedName: string;
+}
+
+export class ReplyStatus {
+  name: keyof typeof ReplyStatuses;
+  localizedName: string;
+  color: string;
+
+  constructor(data: ReplyStatusDto) {
+    this.name = data.statusName;
+    this.localizedName = data.localizedName ?? this.name;
+    this.color = ReplyStatusColor[this.name];
+  }
+
+  toString() {
+    return this.localizedName ?? this.name;
+  }
+
+  toPlainObject() {
+    return {
+      name: this.name,
+      localizedName: this.localizedName,
+    }
+  }
+
+  toJSON() {
+    return JSON.stringify(this.toPlainObject());
+  }
 }
