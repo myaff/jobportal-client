@@ -4,10 +4,10 @@ import { useI18n } from 'vue-i18n';
 import { useUserStore } from './store/user';
 import AuthForm from './components/AuthForm.vue';
 import RegisterForm from './components/RegisterForm.vue';
-import { AuthFormData, UserCreateFormData } from './models/user.model';
 import { useRoute, useRouter } from 'vue-router';
 import { PageName } from './router';
 import { useAppStore } from './store/app';
+import { useDisplay } from 'vuetify';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -17,22 +17,7 @@ const isAuthorized = computed(() => userStore.isAuthorized);
 const user = computed(() => userStore.user);
 const authDialog = ref(false);
 const authDialogMode = ref<'signin' | 'signup'>('signin');
-const signinFormCmp = ref();
-function signIn(formData: AuthFormData) {
-  userStore.login(formData)
-    .then(() => {
-      if (signinFormCmp.value?.reset) signinFormCmp.value.reset();
-      authDialog.value = false;
-    })
-}
-const signupFormCmp = ref();
-function signUp(formData: UserCreateFormData) {
-  userStore.register(formData)
-    .then(() => {
-      if (signupFormCmp.value?.reset) signupFormCmp.value.reset();
-      closeAuth();
-    })
-}
+
 function logout() {
   return userStore.logout().then(() => {
     if (route?.meta?.needAuth) router.push({ name: 'home' });
@@ -46,61 +31,59 @@ const profileMenu = ref(false);
 
 const appStore = useAppStore();
 onMounted(async () => await appStore.init());
+const { smAndUp } = useDisplay();
 </script>
 
 <template>
   <v-app class="bg-grey-lighten-3">
     <v-app-bar>
       <v-container>
-        <v-row class="align-center">
-          <v-col>
-            <v-btn
-              prepend-icon="mdi-home"
-              variant="flat"
-              size="x-large"
-              :to="{ name: PageName.HOME }">
-              <span class="text-h6 font-weight-black">
-                {{ t('app.title') }}
-              </span>
-            </v-btn>
-          </v-col>
+        <div class="d-flex ga-2 align-center">
+          <v-btn
+            prepend-icon="mdi-home"
+            variant="flat"
+            size="x-large"
+            :to="{ name: PageName.HOME }"
+            class="w-auto flex-0-0">
+            <span class="text-h6 font-weight-black">
+              {{ t('app.title') }}
+            </span>
+          </v-btn>
           <v-spacer />
-          <v-col>
-            <v-menu v-if="isAuthorized && user" v-model="profileMenu" location="bottom end" width="200">
-              <template #activator="{ props }">
-                <v-list-item v-bind="props">
-                  <template #append>
-                    <v-avatar color="info">
-                      {{ user.abbreviation }}
-                    </v-avatar>
-                  </template>
-                  <template #title>
-                    <p class="d-none d-sm-block text-right">
-                      {{ `${user.firstName} ${user.lastName}` }}
-                    </p>
-                  </template>
-                  <template #subtitle>
-                    <p class="d-none d-sm-block text-right">
-                      {{ user.email }}
-                    </p>
-                  </template>
-                </v-list-item>
-              </template>
-              <v-list nav>
-                <v-list-item
-                  :title="t('app.pages.account')"
-                  prepend-icon="mdi-account-cog-outline"
-                  :to="{ name: PageName.ACCOUNT }" />
-                <v-list-item
-                  :title="t('actions.signout')"
-                  prepend-icon="mdi-logout"
-                  class="text-red"
-                  @click="logout" />
-              </v-list>
-            </v-menu>
-            <v-btn v-else icon="mdi-account" @click="authDialog = true" />
-          </v-col>
-        </v-row>
+          <v-menu v-if="isAuthorized && user" v-model="profileMenu" location="bottom end" width="200">
+            <template #activator="{ props }">
+              <v-list-item v-bind="props">
+                <template #append>
+                  <v-avatar color="info">
+                    {{ user.abbreviation }}
+                  </v-avatar>
+                </template>
+                <template v-if="smAndUp" #title>
+                  <p class="text-right">
+                    {{ `${user.firstName} ${user.lastName}` }}
+                  </p>
+                </template>
+                <template v-if="smAndUp" #subtitle>
+                  <p class="text-right">
+                    {{ user.email }}
+                  </p>
+                </template>
+              </v-list-item>
+            </template>
+            <v-list nav>
+              <v-list-item
+                :title="t('app.pages.account')"
+                prepend-icon="mdi-account-cog-outline"
+                :to="{ name: PageName.ACCOUNT }" />
+              <v-list-item
+                :title="t('actions.signout')"
+                prepend-icon="mdi-logout"
+                class="text-red"
+                @click="logout" />
+            </v-list>
+          </v-menu>
+          <v-btn v-else icon="mdi-account" class="w-auto flex-0-0 ml-auto" @click="authDialog = true" />
+        </div>
       </v-container>
     </v-app-bar>
 
@@ -115,7 +98,7 @@ onMounted(async () => await appStore.init());
     <v-dialog
       v-model="authDialog"
       max-width="500">
-      <v-card :title="t('app.pages.signin')">
+      <v-card :title="authDialogMode === 'signin' ? t('app.pages.signin') : t('app.pages.signup')">
         <template #append>
           <v-btn
             icon="mdi-close"
@@ -126,8 +109,7 @@ onMounted(async () => await appStore.init());
           <transition name="fade" mode="out-in">
             <auth-form
               v-if="authDialogMode === 'signin'"
-              ref="signinFormCmp"
-              @submit="signIn">
+              @signin="closeAuth">
               <v-btn
                 :text="t('actions.signup')"
                 size="large"
@@ -137,8 +119,7 @@ onMounted(async () => await appStore.init());
             </auth-form>
             <register-form
               v-else-if="authDialogMode === 'signup'"
-              ref="signupFormComp"
-              @submit="signUp">
+              @signup="closeAuth">
               <v-btn
                 :text="t('actions.signin')"
                 size="large"

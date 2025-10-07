@@ -12,6 +12,7 @@ const props = defineProps({
     default: () => [],
   },
 })
+const emits = defineEmits(['download']);
 const { t } = useI18n();
 const userStore = useUserStore();
 const user = computed(() => userStore.user);
@@ -19,12 +20,12 @@ const role = computed(() => user.value?.role ?? UserRole.USER);
 const appStore = useAppStore();
 const replyStatuses = computed(() => appStore.replyStatus);
 const listMapped = computed(() => {
-  return props.list.map(item => ({
-    ...item,
-    status: replyStatuses.value.get(item.status),
-    isMine: role.value === UserRole.USER
-      && item.author.email === user.value?.email,
-  }))
+  return props.list.map(item => {
+    item.isMine = role.value === UserRole.USER
+      && item.author.email === user.value?.email;
+    item.fullStatus = replyStatuses.value.get(item.status);
+    return item;
+  })
 })
 </script>
 
@@ -54,9 +55,9 @@ const listMapped = computed(() => {
               {{ reply.date.toLocaleString() }}
             </div>
           </div>
-          <div v-if="reply?.status" class="status w-100 w-sm-auto ml-sm-auto">
-            <v-chip :color="reply.status.color">
-              {{ reply.status.localizedName }}
+          <div v-if="reply?.fullStatus" class="status w-100 w-sm-auto ml-sm-auto">
+            <v-chip :color="reply.fullStatus.color">
+              {{ reply.fullStatus.localizedName }}
             </v-chip>
           </div>
         </div>
@@ -64,6 +65,16 @@ const listMapped = computed(() => {
       <v-card-text>
         <p class="text-body-1 text-break">{{ reply.content }}</p>
       </v-card-text>
+      <v-card-actions v-if="reply.cv">
+        <v-btn
+          variant="text"
+          prepend-icon="mdi-paperclip"
+          color="primary"
+          :href="reply.getCVLink()"
+          target="_blank">
+          {{ reply.cv }}
+        </v-btn>
+      </v-card-actions>
     </v-card>
   </div>
 </template>

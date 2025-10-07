@@ -7,6 +7,13 @@ export function getQueryParamValue(value: LocationQueryValue | LocationQueryValu
     : value as string ?? '';
 }
 
+export function getQueryParamArray(value: LocationQueryValue | LocationQueryValue[] | null) {
+  if (!value) return [] as string[];
+  return isArray(value) && value.length
+    ? value as string[]
+    : [value ?? ''] as string[];
+}
+
 export function ensureLeadingSlash(value: string) {
   if (value.startsWith('/')) return value;
   return value ? '/' + value : value;

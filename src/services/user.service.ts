@@ -2,6 +2,7 @@ import { User, AuthFormData, AuthResponseData, TokenDTO, UserDto, UserEditFormDa
 import { ApiService } from "./api.service";
 import { AxiosError } from "axios";
 import { ReplyDto, UserReply } from "@/models/reply.model";
+import { FieldErrorDto, FormError } from "@/models/common.model";
 
 export default class UserService extends ApiService {
   resource = 'v1/user';
@@ -14,6 +15,13 @@ export default class UserService extends ApiService {
           refreshToken: this.transformToken(res.data.refresh_token),
         }
       })
+      .catch((e: AxiosError<FieldErrorDto[]>) => {
+        if (e instanceof AxiosError && e.status === 400) {
+          const list = e.response?.data ?? [];
+          if (list.length) throw new FormError(list);
+        }
+        throw e;
+      })
   }
 
   register(formData: AuthFormData) {
@@ -24,6 +32,13 @@ export default class UserService extends ApiService {
           accessToken: this.transformToken(res.data.access_token),
           refreshToken: this.transformToken(res.data.refresh_token),
         }
+      })
+      .catch((e: AxiosError<FieldErrorDto[]>) => {
+        if (e instanceof AxiosError && e.status === 400) {
+          const list = e.response?.data ?? [];
+          if (list.length) throw new FormError(list);
+        }
+        throw e;
       })
   }
 
@@ -54,7 +69,14 @@ export default class UserService extends ApiService {
   editProfile(formData: UserEditFormData) {
     return UserService.api
       .patch<UserDto>(`${this.resource}`, formData)
-      .then(res => new User(res.data));
+      .then(res => new User(res.data))
+      .catch((e: AxiosError<FieldErrorDto[]>) => {
+        if (e instanceof AxiosError && e.status === 400) {
+          const list = e.response?.data ?? [];
+          if (list.length) throw new FormError(list);
+        }
+        throw e;
+      });
   }
 
   getReplies() {

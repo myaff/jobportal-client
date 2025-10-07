@@ -39,6 +39,7 @@ export default {
     yourItem: "Ваш отклик",
     yourItems: "Ваши отклики",
     attachCV: 'Прикрепить резюме',
+    cv: 'Резюме',
   },
   errors: {
     serverError: 'Внутренняя ошибка сервера',

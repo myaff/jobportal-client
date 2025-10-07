@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useDisplay } from 'vuetify';
 
 const props = defineProps({
   modelValue: {
@@ -21,27 +22,31 @@ function clear() {
   search.value = '';
   if (props.modelValue) submit();
 }
+const { xs, smAndUp } = useDisplay();
 </script>
 
 <template>
-  <v-sheet class="list-search px-6 py-5" rounded="xl">
-    <v-form @submit.prevent="submit">
-      <v-text-field
-        v-model="search"
-        prepend-inner-icon="mdi-magnify"
-        clearable
-        hide-details="auto"
-        @update:model-value="value => emits('update:model-value', value)"
-        @click:clear="clear">
-        <template #append>
-          <v-btn color="primary" size="x-large" class="d-none d-sm-flex" @click="submit">
-            {{ t('actions.search') }}
-          </v-btn>
-        </template>
-      </v-text-field>
-      <v-btn color="primary" size="large" block class="d-sm-none mt-4" @click="submit">
-        {{ t('actions.search') }}
-      </v-btn>
-    </v-form>
+  <v-sheet class="list-search py-5">
+    <v-container>
+      <v-form @submit.prevent="submit">
+        <v-text-field
+          v-model="search"
+          prepend-inner-icon="mdi-magnify"
+          clearable
+          hide-details="auto"
+          variant="solo-filled"
+          @update:model-value="value => emits('update:model-value', value)"
+          @click:clear="clear">
+          <template v-if="smAndUp" #append>
+            <v-btn color="yellow" size="x-large" @click="submit">
+              {{ t('actions.search') }}
+            </v-btn>
+          </template>
+        </v-text-field>
+        <v-btn v-if="xs" color="yellow" size="large" block class="mt-4" @click="submit">
+          {{ t('actions.search') }}
+        </v-btn>
+      </v-form>
+    </v-container>
   </v-sheet>
 </template>

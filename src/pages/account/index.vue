@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import ProfileEditForm from '@/components/ProfileEditForm.vue';
 import { UserEditFormData } from '@/models/user.model';
 import UserReplyList from '@/components/UserReplyList.vue';
+import { useDisplay } from 'vuetify';
 
 const { t } = useI18n();
 const breakcrumbs = computed(() => [
@@ -48,6 +49,7 @@ function editProfile(payload: Omit<UserEditFormData, 'email'>) {
 }
 
 onMounted(() => userStore.getReplies());
+const { smAndUp } = useDisplay();
 </script>
 
 <template>
@@ -57,7 +59,7 @@ onMounted(() => userStore.getReplies());
       <v-card v-if="user" variant="flat" :hover="false">
         <v-card-item>
           <div class="d-flex flex-wrap ga-2 align-center">
-            <v-avatar color="grey-lighten-3" size="64" class="d-none d-sm-flex">
+            <v-avatar v-if="smAndUp" color="grey-lighten-3" size="64">
               <v-icon icon="mdi-account" size="32" />
             </v-avatar>
             <div class="content ma-2">

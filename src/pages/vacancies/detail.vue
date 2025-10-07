@@ -92,6 +92,7 @@ function sendReply(formData: FormData) {
     .create(vacancyId.value, formData)
     .then(() => {
       if (replyFormCmp.value?.reset) replyFormCmp.value.reset();
+      fetchReplies(vacancyId.value);
     })
 }
 </script>
@@ -107,7 +108,9 @@ function sendReply(formData: FormData) {
             <vacancy-details-card v-else-if="vacancy" :vacancy="vacancy" />
           </div>
           <div class="replies mt-8">
-            <vacancy-reply-list v-if="isAuthorized && replies?.length" :list="replies" />
+            <vacancy-reply-list
+              v-if="isAuthorized && replies?.length"
+              :list="replies" />
             <reply-form
               v-else-if="isAuthorized && !replies?.length && !isRepliesLoading"
               ref="replyFormCmp"

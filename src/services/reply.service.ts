@@ -16,6 +16,6 @@ export default class ReplyService extends ApiService {
 
   create(id: string, formData: FormData) {
     return ReplyService.api
-      .post(`${this.resource}/vacancy/${id}`, formData);
+      .postForm(`${this.resource}/vacancy/${id}`, formData);
   }
 }

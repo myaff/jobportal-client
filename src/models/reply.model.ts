@@ -9,6 +9,7 @@ export interface ReplyDto {
   status: keyof typeof ReplyStatuses;
   vacancy?: VacancyDto | null;
   vacancyId: string;
+  cv?: string;
 }
 
 export type ReplyCreate = Pick<Reply, 'content'>;
@@ -20,6 +21,9 @@ export class Reply {
   status: keyof typeof ReplyStatuses;
   vacancy: Vacancy | null;
   vacancyId: string;
+  cv: string;
+  isMine: boolean;
+  fullStatus?: ReplyStatus;
 
   constructor(data: ReplyDto) {
     this.id = data.id;
@@ -28,6 +32,12 @@ export class Reply {
     this.status = data.status;
     this.vacancyId = data.vacancyId ?? data.vacancy?.id ?? '';
     this.vacancy = data?.vacancy ? new Vacancy(data.vacancy) : null;
+    this.cv = data?.cv ?? '';
+    this.isMine = false;
+  }
+
+  getCVLink() {
+    return `${import.meta.env.VITE_BASE_API}/v1/reply/vacancy/${this.vacancyId}/cv/${this.cv}`;
   }
 
   toPlainObject() {
@@ -36,7 +46,7 @@ export class Reply {
       content: this.content,
       date: this.date.toISOString(),
       status: this.status,
-      ...(this?.vacancy && { vacancy: this.vacancy.toJSON() }),
+      cv: this.cv,
     }
   }
 

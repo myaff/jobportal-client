@@ -14,7 +14,7 @@ const props = defineProps({
     default: () => [],
   },
 })
-const emits = defineEmits(['update:model-value', 'reset', 'submit']);
+const emits = defineEmits(['update:model-value', 'clear', 'submit']);
 const { t } = useI18n();
 const { groupped } = useTags(props.tags);
 const tags = ref(props.modelValue);
@@ -24,15 +24,16 @@ watch(() => props.modelValue, value => {
 function submit() {
   emits('submit', tags.value);
 }
-function reset() {
+function clear() {
   tags.value = [];
-  emits('reset', tags.value);
+  emits('update:model-value', tags.value);
+  emits('clear', tags.value);
 }
 </script>
 
 <template>
   <div class="list-filters">
-    <div class="list-filters__groups">
+    <div class="list-filters__groups px-2">
       <v-list
         v-for="[key, group] in groupped"
         :key="key"
@@ -57,11 +58,28 @@ function reset() {
         </v-list-item>
       </v-list>
     </div>
-    <div class="d-flex ga-2">
-      <v-btn color="primary" @click="submit">
+    <div class="list-filters__actions position-sticky bottom-0 pa-2 d-flex ga-2 align-center">
+      <v-btn
+        color="primary"
+        class="flex-1-1"
+        size="large"
+        @click="submit">
         {{ t('actions.apply') }}
       </v-btn>
-      <v-btn variant="outlined" icon="mdi-trash-can" density="comfortable" rounded="lg" @click="reset" />
+      <v-btn
+        variant="outlined"
+        icon="mdi-trash-can"
+        rounded="lg"
+        class="flex-0-0"
+        @click="clear" />
     </div>
   </div>
 </template>
+
+<style lang="scss" scoped>
+.list-filters {
+  &__actions {
+    background: inherit;
+  }
+}
+</style>

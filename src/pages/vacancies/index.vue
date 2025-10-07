@@ -13,6 +13,8 @@ import { isNumber } from 'lodash-es';
 import { PageName } from '@/router';
 import { useAppStore } from '@/store/app';
 import VacancyCard from '@/components/VacancyCard.vue';
+import { useDisplay } from 'vuetify';
+import { getQueryParamArray, getQueryParamValue } from '@/composables/useUrlHelper';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -51,8 +53,9 @@ const breakcrumbs = computed(() => [
   },
 ]);
 
-const search = ref('');
-const tagsFilter = ref<string[]>([]);
+const search = ref(getQueryParamValue(route.query?.query ?? ''));
+const tagsFilter = ref<string[]>(getQueryParamArray(route.query?.tags) ?? []);
+
 
 const appStore = useAppStore();
 const vacancyStatuses = computed(() => appStore.vacancyStatus);
@@ -86,7 +89,13 @@ function getRequestParams(): Partial<VacancySearchParams> {
 function setRouteQuery(params: Partial<VacancySearchParams>) {
   const routeQuery = { ...route.query, ...params };
   if (routeQuery?.limit) delete routeQuery.limit;
-  if (isNumber(routeQuery?.page) && routeQuery.page <= PAGIN_BASE) delete routeQuery.page;
+  if (isNumber(routeQuery?.page) && routeQuery.page <= PAGIN_BASE) {
+    delete routeQuery.page;
+  }
+  if (routeQuery?.tags && !tagsFilter.value.length) {
+    delete routeQuery.tags;
+  }
+  if (routeQuery?.query && !search.value) delete routeQuery.query;
   router.replace({ ...route, query: routeQuery });
 }
 
@@ -99,23 +108,24 @@ onMounted(() => {
   updateTags();
   updateList();
 })
+const { mdAndDown, lgAndUp } = useDisplay();
+const showMobileFilters = ref(false);
 </script>
 
 <template>
   <div class="page">
+    <list-search v-model="search" class="bg-blue" @submit="updateList" />
     <v-container>
-      <div class="search-box">
-        <list-search v-model="search" @submit="updateList" />
-      </div>
       <v-breadcrumbs :items="breakcrumbs" class="flex-wrap" />
       <v-row>
-        <v-col cols="12" lg="4">
+        <v-col v-if="lgAndUp" cols="12" lg="4">
           <list-filters
             v-if="tags.length"
             :tags="tags"
             v-model="tagsFilter"
-            class="filters pa-3"
-            @submit="updateList" />
+            class="filters bg-grey-lighten-3"
+            @submit="updateList"
+            @clear="updateList" />
         </v-col>
         <v-col cols="12" lg="8">
           <div class="d-flex flex-column ga-4">
@@ -134,6 +144,22 @@ onMounted(() => {
             @update:model-value="setPage" />
         </v-col>
       </v-row>
+      <v-bottom-sheet v-if="mdAndDown && tags.length" v-model="showMobileFilters">
+        <v-btn icon="mdi-close" variant="plain" color="white" class="position-absolute top-0 right-0 mt-n11" @click="showMobileFilters = false" />
+        <v-sheet>
+          <list-filters
+            :tags="tags"
+            v-model="tagsFilter"
+            class="filters bg-white"
+            @submit="updateList" />
+        </v-sheet>
+      </v-bottom-sheet>
+      <v-fab
+        v-if="mdAndDown"
+        icon="mdi-tune-variant"
+        location="right bottom"
+        app
+        @click="showMobileFilters = true" />
     </v-container>
   </div>
 </template>

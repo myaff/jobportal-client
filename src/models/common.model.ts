@@ -33,3 +33,36 @@ export interface ResponseError {
   message: string;
   errors?: ValidationError[];
 }
+
+export interface FieldErrorDto {
+  code: string;
+  field: string;
+  message: string;
+}
+
+export class FieldError extends Error {
+  code: string;
+  field: string;
+  message: string;
+
+  constructor(data: FieldErrorDto) {
+    super();
+    this.code = data.code;
+    this.field = data.field;
+    this.message = data.message;
+  }
+
+  static isValid(data: Partial<FieldErrorDto>): data is FieldErrorDto {
+    return !!data?.code && !!data?.field && !!data?.message;
+  }
+}
+
+export class FormError {
+  list: FieldError[];
+
+  constructor(errors: FieldErrorDto[] = []) {
+    this.list = errors
+      .filter(e => FieldError.isValid(e))
+      .map(e => new FieldError(e));
+  }
+}
