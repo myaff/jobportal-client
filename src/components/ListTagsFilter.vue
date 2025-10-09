@@ -32,8 +32,8 @@ function clear() {
 </script>
 
 <template>
-  <div class="list-filters">
-    <div class="list-filters__groups px-2">
+  <div class="list-tags-filter">
+    <div class="list-tags-filter__groups px-2">
       <v-list
         v-for="[key, group] in groupped"
         :key="key"
@@ -58,7 +58,7 @@ function clear() {
         </v-list-item>
       </v-list>
     </div>
-    <div class="list-filters__actions position-sticky bottom-0 pa-2 d-flex ga-2 align-center">
+    <div class="list-tags-filter__actions position-sticky bottom-0 pa-2 d-flex ga-2 align-center">
       <v-btn
         color="primary"
         class="flex-1-1"
@@ -77,7 +77,7 @@ function clear() {
 </template>
 
 <style lang="scss" scoped>
-.list-filters {
+.list-tags {
   &__actions {
     background: inherit;
   }

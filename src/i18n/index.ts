@@ -17,7 +17,7 @@ const numberFormats = {
       currency: 'RUB' as const,
       currencyDisplay: 'symbol' as const,
       minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
+      maximumFractionDigits: 0,
     },
   },
 };

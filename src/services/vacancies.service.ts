@@ -1,5 +1,5 @@
 import { ApiService } from "./api.service";
-import { Vacancy, VacancyDto, VacancySearchParams, VacancySearchResponse } from "@/models/vacancy.model";
+import { SalaryRange, Vacancy, VacancyDto, VacancySearchParams, VacancySearchResponse } from "@/models/vacancy.model";
 
 export default class VacancyService extends ApiService {
   resource = 'v1/vacancy';
@@ -24,5 +24,11 @@ export default class VacancyService extends ApiService {
     return VacancyService.api
       .get<VacancyDto>(`${this.resource}/${id}`)
       .then(res => new Vacancy(res.data));
+  }
+
+  getSalaryRange() {
+    return VacancyService.api
+      .get<SalaryRange>(`${this.resource}/salaryRange`)
+      .then(res => res.data);
   }
 }

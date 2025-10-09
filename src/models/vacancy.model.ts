@@ -2,6 +2,11 @@ import { FetchListResponse, FilterParams, PaginationParams, SortParams } from ".
 import Organization, { OrganizationDto } from "./organization.model";
 import { Tag, TagDto } from "./tag.model";
 
+export interface SalaryRange<T = number | null> {
+  from: T;
+  to: T;
+}
+
 export interface VacancyDto {
   id: string;
   title: string;
@@ -11,7 +16,7 @@ export interface VacancyDto {
   organization: OrganizationDto;
   status: keyof typeof VacancyStatuses;
   type: VacancyPropDto;
-  salary: string;
+  salary: SalaryRange;
 }
 
 export interface VacancySearchParams extends
@@ -22,6 +27,8 @@ export interface VacancySearchParams extends
     organization: string;
     status: string;
     type: string;
+    salaryFrom: number;
+    salaryTo: number;
   }
 
 export type VacancySearchResponse = FetchListResponse<VacancyDto>;
@@ -64,7 +71,7 @@ export class Vacancy {
   organization: Organization;
   status: keyof typeof VacancyStatuses;
   type: VacancyProp;
-  salary: string;
+  salary: SalaryRange<number | null>;
 
   constructor(data: VacancyDto) {
     this.id = data.id;
@@ -75,7 +82,7 @@ export class Vacancy {
     this.organization = new Organization(data.organization);
     this.status = data.status;
     this.type = new VacancyProp(data.type);
-    this.salary = data?.salary ?? '';
+    this.salary = data?.salary ?? { from: null, to: null };
   }
 
   toString() {
@@ -143,3 +150,4 @@ export class VacancyStatus {
     return JSON.stringify(this.toPlainObject());
   }
 }
+

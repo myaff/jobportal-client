@@ -30,7 +30,9 @@ export default {
     notFound: 'Вакансия не найдена',
     type: "Тип",
     status: "Статус",
-    salary: 'Оплата'
+    salary: 'Оплата',
+    salaryUnknown: 'По договоренности',
+    salaryUnpaid: 'Без оплаты',
   },
   reply: {
     item: 'Отклик',
@@ -44,6 +46,8 @@ export default {
   errors: {
     serverError: 'Внутренняя ошибка сервера',
   },
+  from: 'От',
+  to: 'До',
   user: {
     firstName: 'Имя',
     middleName: 'Отчество',

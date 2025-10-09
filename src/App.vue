@@ -44,6 +44,7 @@ const { smAndUp } = useDisplay();
             variant="flat"
             size="x-large"
             :to="{ name: PageName.HOME }"
+            :active="false"
             class="w-auto flex-0-0">
             <span class="text-h6 font-weight-black">
               {{ t('app.title') }}

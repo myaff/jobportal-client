@@ -2,6 +2,8 @@
 import { Vacancy, VacancyStatus } from '@/models/vacancy.model';
 import { useI18n } from 'vue-i18n';
 import { PageName } from '@/router';
+import { computed } from 'vue';
+import { isNaN, isNull } from 'lodash-es';
 
 const props = defineProps({
   vacancy: {
@@ -13,7 +15,20 @@ const props = defineProps({
     required: true,
   },
 })
-const { t } = useI18n();
+const { t, n } = useI18n();
+const salaryFormatted = computed(() => {
+  if (!props.vacancy?.salary
+    || (isNull(props.vacancy.salary.from)
+    && isNull(props.vacancy.salary.to))) {
+      return t('vacancy.salaryUnknown');
+  }
+  const { from, to } = props.vacancy.salary;
+  if (from === 0 && to === 0) return t('vacancy.salaryUnpaid');
+  const parts: string[] = [];
+  if (from) parts.push(`${t('from')} ${n(from, 'currency')}`)
+  if (to) parts.push(`${t('to')} ${n(to, 'currency')}`);
+  return parts.join(' ').toLocaleLowerCase();
+})
 </script>
 
 <template>
@@ -46,7 +61,7 @@ const { t } = useI18n();
       <p v-if="vacancy?.salary" class="text-body-1 mb-3">
         {{ t('vacancy.salary') }}:
         <span class="font-weight-bold">
-          {{ vacancy.salary }}
+          {{ salaryFormatted }}
         </span>
       </p>
       <v-chip-group column>

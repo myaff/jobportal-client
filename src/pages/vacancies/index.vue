@@ -1,20 +1,21 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import ListFilters from '@/components/ListFilters.vue';
+import ListTagsFilter from '@/components/ListTagsFilter.vue';
 import ListSearch from '@/components/ListSearch.vue';
 import VacancyService from '@/services/vacancies.service';
 import usePagination from '@/composables/usePagnation';
-import { Vacancy, VacancySearchParams, VacancyStatus } from '@/models/vacancy.model';
+import { SalaryRange, Vacancy, VacancySearchParams, VacancyStatus } from '@/models/vacancy.model';
 import { Tag } from '@/models/tag.model';
 import TagService from '@/services/tags.service';
-import { useRouter, useRoute } from 'vue-router';
-import { isNumber } from 'lodash-es';
+import { useRouter, useRoute, LocationQuery } from 'vue-router';
+import { isNaN, isNumber } from 'lodash-es';
 import { PageName } from '@/router';
 import { useAppStore } from '@/store/app';
 import VacancyCard from '@/components/VacancyCard.vue';
 import { useDisplay } from 'vuetify';
 import { getQueryParamArray, getQueryParamValue } from '@/composables/useUrlHelper';
+import ListSalaryFilter from '@/components/ListSalaryFIlter.vue';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -42,16 +43,15 @@ function setPage(n: number) {
 
 const list = ref<Vacancy[]>([]);
 const tags = ref<Tag[]>([]);
-const breakcrumbs = computed(() => [
-  {
-    title: t('app.pages.home'),
-    to: { name: 'home' },
-  },
-  {
-    title: t('app.pages.vacancies'),
-    to: { name: 'vacancies' },
-  },
-]);
+const salaryRange = ref<SalaryRange | null>(null);
+const salaryModel = ref<SalaryRange<number>>(getSalaryFromQuery(route.query));
+const salaryParams = computed(() => {
+  if (!salaryRange.value) return null;
+  return {
+    ...(salaryModel.value.from !== salaryRange.value.from && { salaryFrom: salaryModel.value.from }),
+    ...(salaryModel.value.to !== salaryRange.value.to && { salaryTo: salaryModel.value.to }),
+  };
+})
 
 const search = ref(getQueryParamValue(route.query?.query ?? ''));
 const tagsFilter = ref<string[]>(getQueryParamArray(route.query?.tags) ?? []);
@@ -83,7 +83,16 @@ function getRequestParams(): Partial<VacancySearchParams> {
     ...paginationParams.value,
     ...(search.value && { query: search.value }),
     ...(tagsFilter.value.length && { tags: tagsFilter.value }),
+    ...(!!salaryParams.value && salaryParams.value),
   }
+}
+function getSalaryFromQuery(query: LocationQuery) {
+  const from = parseInt(getQueryParamValue(query?.salaryFrom));
+  const to = parseInt(getQueryParamValue(query?.salaryTo));
+  return {
+    from: !isNaN(from) ? from : 0,
+    to: !isNaN(to) ? to : Number.MAX_VALUE,
+  };
 }
 
 function setRouteQuery(params: Partial<VacancySearchParams>) {
@@ -96,6 +105,12 @@ function setRouteQuery(params: Partial<VacancySearchParams>) {
     delete routeQuery.tags;
   }
   if (routeQuery?.query && !search.value) delete routeQuery.query;
+  if (routeQuery?.salaryFrom && routeQuery.salaryFrom == salaryRange.value?.from) {
+    delete routeQuery.salaryFrom;
+  }
+  if (routeQuery?.salaryTo && routeQuery.salaryTo == salaryRange.value?.to) {
+    delete routeQuery.salaryTo;
+  }
   router.replace({ ...route, query: routeQuery });
 }
 
@@ -104,7 +119,21 @@ function updateTags() {
     tags.value = data.content;
   })
 }
-onMounted(() => {
+function updateSalaryRange() {
+  return vacanciesService.getSalaryRange()
+    .then(range => {
+      salaryRange.value = range;
+      const from = Math.max(range.from ?? Number.MIN_VALUE, salaryModel.value.from);
+      const to = Math.max(from, Math.min(range.to ?? Number.MAX_VALUE, salaryModel.value.to));
+      salaryModel.value = {
+        from,
+        to: to === Number.MAX_VALUE ? from : to,
+      };
+    });
+}
+
+onMounted(async () => {
+  await updateSalaryRange();
   updateTags();
   updateList();
 })
@@ -114,12 +143,16 @@ const showMobileFilters = ref(false);
 
 <template>
   <div class="page">
-    <list-search v-model="search" class="bg-blue" @submit="updateList" />
+    <list-search v-model="search" class="bg-blue mb-4" @submit="updateList" />
     <v-container>
-      <v-breadcrumbs :items="breakcrumbs" class="flex-wrap" />
       <v-row>
         <v-col v-if="lgAndUp" cols="12" lg="4">
-          <list-filters
+          <list-salary-filter
+            v-if="salaryRange && salaryRange.from !== salaryRange.to"
+            v-model="salaryModel"
+            :min="salaryRange.from ?? 0"
+            :max="salaryRange.to ?? 0" />
+          <list-tags-filter
             v-if="tags.length"
             :tags="tags"
             v-model="tagsFilter"
@@ -147,7 +180,12 @@ const showMobileFilters = ref(false);
       <v-bottom-sheet v-if="mdAndDown && tags.length" v-model="showMobileFilters">
         <v-btn icon="mdi-close" variant="plain" color="white" class="position-absolute top-0 right-0 mt-n11" @click="showMobileFilters = false" />
         <v-sheet>
-          <list-filters
+          <list-salary-filter
+            v-if="salaryRange && salaryRange.from !== salaryRange.to"
+            v-model="salaryModel"
+            :min="salaryRange.from ?? 0"
+            :max="salaryRange.to ?? 0" />
+          <list-tags-filter
             :tags="tags"
             v-model="tagsFilter"
             class="filters bg-white"
