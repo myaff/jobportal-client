@@ -1,14 +1,13 @@
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from './store/user';
 import AuthForm from './components/AuthForm.vue';
 import RegisterForm from './components/RegisterForm.vue';
-import { useRoute, useRouter } from 'vue-router';
+import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router';
 import { PageName } from './router';
 import { useAppStore } from './store/app';
 import { useDisplay } from 'vuetify';
-import { UserRole } from './models/user.model';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -32,7 +31,7 @@ const profileMenu = ref(false);
 
 const appStore = useAppStore();
 onMounted(async () => await appStore.init());
-const { smAndUp } = useDisplay();
+const { smAndUp, lgAndUp } = useDisplay();
 
 const mainNav = computed(() => {
   return [
@@ -50,6 +49,13 @@ const mainNav = computed(() => {
     }),
   ].filter(item => !!item);
 })
+const mobileNavOpen = ref(false);
+watch(lgAndUp, value => {
+  if (!value) mobileNavOpen.value = false;
+})
+watch(() => route.name, () => {
+  mobileNavOpen.value = false;
+})
 </script>
 
 <template>
@@ -57,6 +63,12 @@ const mainNav = computed(() => {
     <v-app-bar>
       <v-container>
         <div class="d-flex ga-2 align-center">
+          <v-btn
+            v-if="!lgAndUp"
+            icon="mdi-menu"
+            class="flex-0-0"
+            variant="plain"
+            @click="mobileNavOpen = true" />
           <v-btn
             prepend-icon="mdi-home"
             variant="flat"
@@ -68,7 +80,7 @@ const mainNav = computed(() => {
               {{ t('app.title') }}
             </span>
           </v-btn>
-          <v-tabs v-if="smAndUp || mainNav.length === 1">
+          <v-tabs v-if="lgAndUp">
             <v-tab
               v-for="item in mainNav"
               :key="item.name"
@@ -80,21 +92,19 @@ const mainNav = computed(() => {
           <v-menu v-if="isAuthorized && user" v-model="profileMenu" location="bottom end" width="200">
             <template #activator="{ props }">
               <v-list-item v-bind="props">
-                <template #append>
-                  <v-avatar color="info">
+                <div class="d-flex align-center">
+                  <div v-if="smAndUp" class="text-right mr-3">
+                    <p class="text-bofy-1 font-weight-bold">
+                      {{ `${user.firstName} ${user.lastName}` }}
+                    </p>
+                    <p class="text-body-2 color-grey">
+                      {{ user.email }}
+                    </p>
+                  </div>
+                  <v-avatar color="info" class="flex-0-0">
                     {{ user.abbreviation }}
                   </v-avatar>
-                </template>
-                <template v-if="smAndUp" #title>
-                  <p class="text-right">
-                    {{ `${user.firstName} ${user.lastName}` }}
-                  </p>
-                </template>
-                <template v-if="smAndUp" #subtitle>
-                  <p class="text-right">
-                    {{ user.email }}
-                  </p>
-                </template>
+                </div>
               </v-list-item>
             </template>
             <v-list nav>
@@ -141,6 +151,7 @@ const mainNav = computed(() => {
                 :text="t('actions.signup')"
                 size="large"
                 block
+                variant="plain"
                 class="mt-4"
                 @click="authDialogMode = 'signup'" />
             </auth-form>
@@ -150,6 +161,7 @@ const mainNav = computed(() => {
               <v-btn
                 :text="t('actions.signin')"
                 size="large"
+                variant="plain"
                 block
                 class="mt-4"
                 @click="authDialogMode = 'signin'" />
@@ -158,5 +170,15 @@ const mainNav = computed(() => {
         </v-card-text>
       </v-card>
     </v-dialog>
+    <v-bottom-sheet v-if="!lgAndUp && mainNav.length > 1" v-model="mobileNavOpen">
+      <v-list>
+        <v-list-item
+          v-for="item in mainNav"
+          :key="item.name"
+          :to="{ name: item.name }">
+          {{ item.title }}
+        </v-list-item>
+      </v-list>
+    </v-bottom-sheet>
   </v-app>
 </template>

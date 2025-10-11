@@ -55,12 +55,15 @@ const router = createRouter({
 
 router.beforeEach(async (to: RouteLocationNormalized) => {
   const userStore = useUserStore();
-  await userStore.init();
+  try {
+    await userStore.init();
+  } catch(e: unknown) {
+    console.log((e as { message?: string })?.message);
+  }
   if (!to.meta?.role) return true;
-  if (userStore.isAuthorized) {
-    const accepted = to.meta.role as string[];
-    return accepted.includes(userStore.user?.role ?? UserRole.ANON)
-  } else return { name: 'home' };
+  const accepted = to.meta.role as string[];
+  if (accepted.includes(userStore.userRole)) return true;
+  return { name: PageName.HOME };
 })
 
 export default router

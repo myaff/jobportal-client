@@ -1,5 +1,5 @@
 import { isNull } from "lodash-es";
-import { FetchListResponse, FilterParams, PaginationParams, SortParams } from "./common.model";
+import { CommonStatus, FetchListResponse, FilterParams, PaginationParams, SortParams } from "./common.model";
 import Organization, { OrganizationDto } from "./organization.model";
 import { Tag, TagDto } from "./tag.model";
 
@@ -140,7 +140,7 @@ export enum VacancyStatusColor {
   SUSPENDED = 'warning'
 }
 
-export class VacancyStatus {
+export class VacancyStatus implements CommonStatus {
   name: keyof typeof VacancyStatuses;
   localizedName: string;
   color: string;

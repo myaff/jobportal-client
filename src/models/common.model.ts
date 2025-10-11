@@ -66,3 +66,11 @@ export class FormError {
       .map(e => new FieldError(e));
   }
 }
+
+export type Nullable<T> = T | null;
+
+export interface CommonStatus {
+  name: string;
+  localizedName: string;
+  color: string;
+}

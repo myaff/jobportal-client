@@ -16,7 +16,7 @@ export default class UserService extends ApiService {
         }
       })
       .catch((e: AxiosError<FieldErrorDto[]>) => {
-        if (e instanceof AxiosError && e.status === 400) {
+        if (e instanceof AxiosError && (e?.status ?? 400) >= 400) {
           const list = e.response?.data ?? [];
           if (list.length) throw new FormError(list);
         }

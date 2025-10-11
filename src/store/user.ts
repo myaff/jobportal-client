@@ -1,6 +1,6 @@
 import { UserReply } from "@/models/reply.model";
 import type { AuthFormData, UserCreateFormData, UserEditFormData } from "@/models/user.model";
-import { User } from "@/models/user.model";
+import { User, UserRole } from "@/models/user.model";
 import UserService from "@/services/user.service";
 import { useLocalStorage } from "@vueuse/core";
 import { isBefore } from "date-fns";
@@ -25,6 +25,7 @@ export const useUserStore = defineStore('user', () => {
   const isAuthorized = computed(() => !!token.value);
   const userService = new UserService();
   const replies = ref<UserReply[]>([]);
+  const userRole = computed(() => user.value?.role ?? UserRole.ANON);
 
   const login = (formData: AuthFormData) => {
     return userService.login(formData).then(data => {
@@ -116,6 +117,7 @@ export const useUserStore = defineStore('user', () => {
     token,
     isAuthorized,
     user,
+    userRole,
     replies,
     login,
     register,

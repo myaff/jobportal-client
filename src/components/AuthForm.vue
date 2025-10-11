@@ -3,6 +3,7 @@ import { FormError } from '@/models/common.model';
 import { useUserStore } from '@/store/user';
 import { reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useDisplay } from 'vuetify';
 
 const emits = defineEmits(['signin']);
 defineExpose({ reset });
@@ -37,6 +38,7 @@ function submit() {
     })
     .finally(() => isSending.value = false);
 }
+const { smAndUp } = useDisplay();
 </script>
 
 <template>
@@ -45,11 +47,17 @@ function submit() {
     <v-text-field
       v-model="formData.email"
       type="email"
-      :label="t('user.email')" />
+      :label="t('user.email')"
+      :error="errors.has('email')"
+      :error-messages="errors.get('email')"
+      :density="smAndUp ? 'default' : 'comfortable'" />
     <v-text-field
       v-model="formData.password"
       type="password"
       :label="t('user.password')"
+      :error="errors.has('password')"
+      :error-messages="errors.get('password')"
+      :density="smAndUp ? 'default' : 'comfortable'"
       class="mt-2" />
     <v-btn
       :text="t('actions.signin')"
