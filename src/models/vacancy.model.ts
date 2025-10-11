@@ -1,3 +1,4 @@
+import { isNull } from "lodash-es";
 import { FetchListResponse, FilterParams, PaginationParams, SortParams } from "./common.model";
 import Organization, { OrganizationDto } from "./organization.model";
 import { Tag, TagDto } from "./tag.model";
@@ -85,6 +86,15 @@ export class Vacancy {
     this.salary = data?.salary ?? { from: null, to: null };
   }
 
+  get salaryStatus() {
+    if (!this.salary || (isNull(this.salary.from) && isNull(this.salary.to))) {
+      return VacancySalaryStatus.UNKNOWN;
+    }
+    const { from, to } = this.salary;
+    if (from === 0 && to === 0) return VacancySalaryStatus.UNPAID;
+    return VacancySalaryStatus.DEFINED;
+  }
+
   toString() {
     return this.title;
   }
@@ -116,6 +126,12 @@ export enum VacancyStatuses {
   OPEN = 'SEEN',
   CLOSED = 'REJECTED',
   SUSPENDED = 'SUSPENDED',
+}
+
+export enum VacancySalaryStatus {
+  UNKNOWN = 'UNKNOWN',
+  UNPAID = 'UNPAID',
+  DEFINED = 'DEFINED',
 }
 
 export enum VacancyStatusColor {

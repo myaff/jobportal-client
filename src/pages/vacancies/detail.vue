@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { getQueryParamValue } from '@/composables/useUrlHelper';
-import { VacancyReply } from '@/models/reply.model';
+import { ReplyDto, VacancyReply } from '@/models/reply.model';
 import { Vacancy } from '@/models/vacancy.model';
 import ReplyService from '@/services/reply.service';
 import VacancyService from '@/services/vacancies.service';
@@ -95,6 +95,11 @@ function sendReply(formData: FormData) {
       fetchReplies(vacancyId.value);
     })
 }
+function updateReply(payload: { id: VacancyReply['id'], formData: Partial<ReplyDto> }) {
+  return replyService.update(payload.id, payload.formData).then(() => {
+    fetchReplies(vacancyId.value);
+  });
+}
 </script>
 
 <template>
@@ -110,7 +115,8 @@ function sendReply(formData: FormData) {
           <div class="replies mt-8">
             <vacancy-reply-list
               v-if="isAuthorized && replies?.length"
-              :list="replies" />
+              :list="replies"
+              @update:reply="updateReply" />
             <reply-form
               v-else-if="isAuthorized && !replies?.length && !isRepliesLoading"
               ref="replyFormCmp"

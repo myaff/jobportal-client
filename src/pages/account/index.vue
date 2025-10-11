@@ -6,6 +6,7 @@ import ProfileEditForm from '@/components/ProfileEditForm.vue';
 import { UserEditFormData } from '@/models/user.model';
 import UserReplyList from '@/components/UserReplyList.vue';
 import { useDisplay } from 'vuetify';
+import UserDetailsCard from '@/components/UserDetailsCard.vue';
 
 const { t } = useI18n();
 const breakcrumbs = computed(() => [
@@ -56,29 +57,8 @@ const { smAndUp } = useDisplay();
   <div class="page">
     <v-container>
       <v-breadcrumbs :items="breakcrumbs" />
-      <v-card v-if="user" variant="flat" :hover="false">
-        <v-card-item>
-          <div class="d-flex flex-wrap ga-2 align-center">
-            <v-avatar v-if="smAndUp" color="grey-lighten-3" size="64">
-              <v-icon icon="mdi-account" size="32" />
-            </v-avatar>
-            <div class="content ma-2">
-              <h2 class="text-h5 text-lg-h4 mx-2 mt-2 font-weight-bold">
-                {{ user?.fullName }}
-              </h2>
-              <p class="text-h6 mx-2 mb-2 text-grey">
-                {{ user.email }}
-              </p>
-            </div>
-            <div class="setting position-absolute top-0 right-0 mt-1 mr-1 mt-sm-2 mr-sm-2">
-              <v-btn
-                icon="mdi-cog"
-                variant="flat"
-                @click="editDialolog = true" />
-            </div>
-          </div>
-        </v-card-item>
-        <v-card-text>
+      <user-details-card v-if="user" :user="user" editable @edit="editDialolog = true">
+        <template #description>
           <div class="user-description">
             <v-textarea
               v-model="userDescription"
@@ -107,8 +87,8 @@ const { smAndUp } = useDisplay();
               </template>
             </v-textarea>
           </div>
-        </v-card-text>
-      </v-card>
+        </template>
+      </user-details-card>
       <user-reply-list v-if="replies?.length" :list="replies" class="mt-12" />
       <v-dialog v-model="editDialolog" max-width="500">
         <v-card :title="t('user.edit')">

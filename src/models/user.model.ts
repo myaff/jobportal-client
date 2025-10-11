@@ -1,4 +1,5 @@
 export enum UserRole {
+  ANON = 'ANON',
   USER = 'USER',
   ADMIN = 'ADMIN',
   MANAGER = 'MANAGER',
@@ -42,18 +43,23 @@ export class User implements UserDto {
   firstName: string;
   lastName: string;
   middleName: string | null | undefined;
-  role: "USER" | "ADMIN" | "MANAGER";
+  role: "USER" | "ADMIN" | "MANAGER" | 'ANON';
   description: string;
 
   get fullName() {
     const parts = [this.firstName];
     if (this.middleName) parts.push(this.middleName);
     parts.push(this.lastName);
-    return parts.join(' ');
+    return parts.filter(item => !!item).join(' ') || this.email;
   }
 
   get abbreviation() {
     return (this.firstName.at(0) ?? '?') + (this.lastName.at(0) ?? '?');
+  }
+
+  get managerAndUp() {
+    return this.role === UserRole.MANAGER
+    || this.role === UserRole.ADMIN;
   }
 
   constructor(data: UserDto) {

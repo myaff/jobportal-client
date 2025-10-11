@@ -31,4 +31,12 @@ export default class VacancyService extends ApiService {
       .get<SalaryRange>(`${this.resource}/salaryRange`)
       .then(res => res.data);
   }
+
+  getAll() {
+    return VacancyService.api
+      .get<VacancyDto[]>(`${this.resource}`)
+      .then(res => res.data
+        .filter(item => Vacancy.isValid(item))
+        .map(item => new Vacancy(item)));
+  }
 }

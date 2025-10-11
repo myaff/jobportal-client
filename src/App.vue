@@ -8,6 +8,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { PageName } from './router';
 import { useAppStore } from './store/app';
 import { useDisplay } from 'vuetify';
+import { UserRole } from './models/user.model';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -20,7 +21,7 @@ const authDialogMode = ref<'signin' | 'signup'>('signin');
 
 function logout() {
   return userStore.logout().then(() => {
-    if (route?.meta?.needAuth) router.push({ name: 'home' });
+    if (route?.meta?.role) router.push({ name: 'home' });
   });
 }
 function closeAuth() {
@@ -32,6 +33,23 @@ const profileMenu = ref(false);
 const appStore = useAppStore();
 onMounted(async () => await appStore.init());
 const { smAndUp } = useDisplay();
+
+const mainNav = computed(() => {
+  return [
+    {
+      name: PageName.VACANCIES,
+      title: t('app.pages.vacanciesSearch'),
+    },
+    (user.value?.managerAndUp && {
+      name: PageName.MY_VACANCIES,
+      title: t('app.pages.myVacancies'),
+    }),
+     (user.value?.managerAndUp && {
+      name: PageName.REPLIES,
+      title: t('app.pages.replies'),
+    }),
+  ].filter(item => !!item);
+})
 </script>
 
 <template>
@@ -50,6 +68,14 @@ const { smAndUp } = useDisplay();
               {{ t('app.title') }}
             </span>
           </v-btn>
+          <v-tabs v-if="smAndUp || mainNav.length === 1">
+            <v-tab
+              v-for="item in mainNav"
+              :key="item.name"
+              :to="{ name: item.name }">
+              {{ item.title }}
+            </v-tab>
+          </v-tabs>
           <v-spacer />
           <v-menu v-if="isAuthorized && user" v-model="profileMenu" location="bottom end" width="200">
             <template #activator="{ props }">
@@ -83,7 +109,7 @@ const { smAndUp } = useDisplay();
                 @click="logout" />
             </v-list>
           </v-menu>
-          <v-btn v-else icon="mdi-account" class="w-auto flex-0-0 ml-auto" @click="authDialog = true" />
+          <v-btn v-else icon="mdi-account" class="flex-0-0 ml-auto" @click="authDialog = true" />
         </div>
       </v-container>
     </v-app-bar>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import useTags from '@/composables/useTags';
-import { Vacancy, VacancyStatus } from '@/models/vacancy.model';
+import { Vacancy, VacancySalaryStatus, VacancyStatus } from '@/models/vacancy.model';
 import { useAppStore } from '@/store/app';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -21,7 +21,21 @@ const status = computed(() => {
     });
 })
 const { groupped } = useTags(props.vacancy.tags);
-const { t } = useI18n();
+const { t, n } = useI18n();
+const salaryFormatted = computed(() => {
+  const salaryStatus = props.vacancy.salaryStatus;
+  if (salaryStatus === VacancySalaryStatus.UNKNOWN) {
+    return t('vacancy.salaryUnknown');
+  }
+  if (salaryStatus === VacancySalaryStatus.UNPAID) {
+    return t('vacancy.salaryUnpaid');
+  }
+  const { from, to } = props.vacancy.salary;
+  const parts: string[] = [];
+  if (from) parts.push(`${t('from')} ${n(from, 'currency')}`)
+  if (to) parts.push(`${t('to')} ${n(to, 'currency')}`);
+  return parts.join(' ').toLocaleLowerCase();
+})
 </script>
 
 <template>
@@ -47,7 +61,7 @@ const { t } = useI18n();
       <p v-if="vacancy?.salary" class="text-body-1 mb-3">
         {{ t('vacancy.salary') }}:
         <span class="font-weight-bold">
-          {{ vacancy.salary }}
+          {{ salaryFormatted }}
         </span>
       </p>
       <div class="vacancy-tag-group d-flex align-center ga-2">
